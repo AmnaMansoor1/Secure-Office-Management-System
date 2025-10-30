@@ -1,0 +1,32 @@
+.analytics-card {
+  border-radius: 18px;
+  box-shadow: 0 4px 24px rgba(60, 72, 88, 0.10);
+  color: #fff;
+  padding: 32px 24px;
+  margin-bottom: 24px;
+  transition: box-shadow 0.2s, transform 0.2s, background 0.3s;
+  position: relative;
+  overflow: hidden;
+}
+.analytics-card.income {
+  background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+}
+.analytics-card.expenses {
+  background: linear-gradient(135deg, #f953c6 0%, #b91d73 100%);
+}
+.analytics-card.profit {
+  background: linear-gradient(135deg, #f7971e 0%, #ffd200 100%);
+}
+.analytics-card.assets {
+  background: linear-gradient(135deg, #667eea 0%, #43cea2 100%);
+}
+.analytics-card.employees {
+  background: linear-gradient(135deg, #7b2ff2 0%, #f7971e 100%);
+}
+.analytics-card:hover {
+  box-shadow: 0 8px 32px rgba(60, 72, 88, 0.18);
+  transform: translateY(-2px) scale(1.03);
+  filter: brightness(1.05);
+}
+
+/* Example for chart series colors (if using chart.js or recharts, update series colors in JS config) */ 

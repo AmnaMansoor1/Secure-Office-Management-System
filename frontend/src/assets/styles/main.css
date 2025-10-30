@@ -1,0 +1,183 @@
+/* Main Styles for the entire app */
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+
+:root {
+  --primary-color: #4568dc;
+  --primary-dark: #3452c3;
+  --primary-light: #6a78dd;
+  --secondary-color: #b06ab3;
+  --success-color: #11998e;
+  --success-light: #38ef7d;
+  --danger-color: #ED213A;
+  --danger-light: #FF6B6B;
+  --warning-color: #F2994A;
+  --warning-light: #F2C94C;
+  --info-color: #21D4FD;
+  --info-dark: #2152FF;
+  --dark-color: #333;
+  --gray-dark: #555;
+  --gray: #6c757d;
+  --gray-light: #dee2e6;
+  --light-color: #f8f9fa;
+  --white: #fff;
+  
+  --border-radius: 12px;
+  --box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+  --box-shadow-hover: 0 8px 25px rgba(0, 0, 0, 0.1);
+  
+  --transition: all 0.3s ease;
+  
+  --font-family: 'Poppins', sans-serif;
+}
+
+/* Global Styles */
+body {
+  font-family: var(--font-family);
+  background-color: #f5f7fb;
+  color: var(--dark-color);
+  overflow-x: hidden;
+  padding: 0;
+  margin: 0;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-weight: 600;
+}
+
+a {
+  color: var(--primary-color);
+  text-decoration: none;
+  transition: var(--transition);
+}
+
+a:hover {
+  color: var(--primary-dark);
+  text-decoration: none;
+}
+
+/* Layout Structure */
+.layout-container {
+  display: flex;
+  min-height: 100vh;
+  position: relative;
+}
+
+.main-content {
+  flex: 1;
+  margin-left: 250px;
+  min-height: 100vh;
+  transition: var(--transition);
+  background-color: #f5f7fb;
+}
+
+.content-area {
+  padding: 2rem;
+}
+
+.main-content-full {
+  flex: 1;
+  margin-left: 0;
+  min-height: 100vh;
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f5f5f5;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #ccc;
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--primary-color);
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fadeInDown {
+  from { opacity: 0; transform: translateY(-20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fadeInLeft {
+  from { opacity: 0; transform: translateX(-20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fadeInRight {
+  from { opacity: 0; transform: translateX(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes growIn {
+  from { opacity: 0; transform: scale(0.9); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+@keyframes pulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+  100% { transform: scale(1); }
+}
+
+@keyframes spin {
+  100% { transform: rotate(360deg); }
+}
+
+/* Utility Classes */
+.text-primary { color: var(--primary-color) !important; }
+.text-success { color: var(--success-color) !important; }
+.text-danger { color: var(--danger-color) !important; }
+.text-warning { color: var(--warning-color) !important; }
+.text-info { color: var(--info-color) !important; }
+
+.bg-primary { background-color: var(--primary-color) !important; }
+.bg-success { background-color: var(--success-color) !important; }
+.bg-danger { background-color: var(--danger-color) !important; }
+.bg-warning { background-color: var(--warning-color) !important; }
+.bg-info { background-color: var(--info-color) !important; }
+.bg-light { background-color: var(--light-color) !important; }
+
+.shadow-sm { box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05) !important; }
+.shadow { box-shadow: var(--box-shadow) !important; }
+.shadow-lg { box-shadow: var(--box-shadow-hover) !important; }
+
+.rounded { border-radius: var(--border-radius) !important; }
+.rounded-lg { border-radius: calc(var(--border-radius) * 1.5) !important; }
+.rounded-circle { border-radius: 50% !important; }
+
+.transition { transition: var(--transition) !important; }
+
+.fade-in { animation: fadeIn 0.5s ease forwards; }
+.fade-in-up { animation: fadeInUp 0.5s ease forwards; }
+.fade-in-down { animation: fadeInDown 0.5s ease forwards; }
+.fade-in-left { animation: fadeInLeft 0.5s ease forwards; }
+.fade-in-right { animation: fadeInRight 0.5s ease forwards; }
+.grow-in { animation: growIn 0.5s ease forwards; }
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .main-content {
+    margin-left: 0;
+  }
+  
+  .content-area {
+    padding: 1rem;
+  }
+}

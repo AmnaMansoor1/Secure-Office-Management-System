@@ -1,0 +1,28 @@
+/* MainLayout.css */
+.layout-container {
+    display: flex;
+    min-height: 100vh;
+  }
+  
+  .main-content {
+    margin-left: 240px;
+    width: calc(100% - 240px);
+    min-height: 100vh;
+    transition: all 0.3s ease;
+  }
+  
+  .main-content-full {
+    width: 100%;
+    min-height: 100vh;
+  }
+  
+  .content-area {
+    padding: 20px;
+  }
+  
+  @media (max-width: 768px) {
+    .main-content {
+      margin-left: 0;
+      width: 100%;
+    }
+  }
