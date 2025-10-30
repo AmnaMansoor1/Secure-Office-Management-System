@@ -102,16 +102,21 @@ const userSchema = new mongoose.Schema({
   timestamps: true
 });
 
-// Encrypt password using bcrypt
+// Encrypt password using bcrypt (fixed)
 userSchema.pre('save', async function(next) {
+  // Only hash the password if it has been modified or is new
   if (!this.isModified('password')) {
-    next();
+    return next(); // prevent double-hashing
   }
 
-  const salt = await bcrypt.genSalt(10);
-  this.password = await bcrypt.hash(this.password, salt);
+  try {
+    const salt = await bcrypt.genSalt(10);
+    this.password = await bcrypt.hash(this.password, salt);
+    next();
+  } catch (err) {
+    next(err);
+  }
 });
-
 // Set default permissions based on role
 userSchema.pre('save', function(next) {
   if (this.isModified('role') || this.isNew) {
