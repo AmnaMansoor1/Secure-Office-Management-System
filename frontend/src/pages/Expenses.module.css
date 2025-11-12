@@ -1,0 +1,19 @@
+.expense-list-card {
+    box-shadow: 0 4px 24px rgba(60, 72, 88, 0.10);
+    border-radius: 18px;
+    background: #fff;
+  }
+  
+  .expense-list-header {
+    background: linear-gradient(90deg, #f953c6 0%, #b91d73 100%);
+    color: #fff;
+    font-weight: 700;
+    font-size: 1.3rem;
+    padding: 18px 32px;
+    border-top-left-radius: 18px;
+    border-top-right-radius: 18px;
+    letter-spacing: 1px;
+    margin-bottom: 0;
+    text-align: left;
+  }
+  

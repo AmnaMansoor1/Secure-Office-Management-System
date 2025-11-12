@@ -1,0 +1,89 @@
+/* Dashboard.css */
+
+.dashboard {
+  padding: 24px 0;
+}
+
+.dashboard-cards-row {
+  display: flex;
+  gap: 24px;
+  margin-bottom: 32px;
+}
+
+.dashboard-card {
+  flex: 1;
+  min-width: 0;
+  background: linear-gradient(135deg, #f8fafc 0%, #e0e7ff 100%);
+  border-radius: 18px;
+  box-shadow: 0 4px 24px rgba(60, 72, 88, 0.10);
+  display: flex;
+  align-items: center;
+  padding: 32px 24px;
+  transition: box-shadow 0.2s, transform 0.2s, background 0.3s;
+  position: relative;
+  overflow: hidden;
+}
+
+.dashboard-card.employees {
+  background: linear-gradient(135deg, #43cea2 0%, #185a9d 100%);
+  color: #fff;
+}
+.dashboard-card.assets {
+  background: linear-gradient(135deg, #f7971e 0%, #ffd200 100%);
+  color: #fff;
+}
+.dashboard-card.expenses {
+  background: linear-gradient(135deg, #f953c6 0%, #b91d73 100%);
+  color: #fff;
+}
+.dashboard-card.income {
+  background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+  color: #fff;
+}
+.dashboard-card.analytics {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: #fff;
+}
+
+.dashboard-card:hover {
+  box-shadow: 0 8px 32px rgba(60, 72, 88, 0.18);
+  transform: translateY(-2px) scale(1.03);
+  filter: brightness(1.05);
+}
+
+.dashboard-card .card-icon {
+  font-size: 2.5rem;
+  margin-right: 20px;
+  opacity: 0.18;
+  position: absolute;
+  right: 24px;
+  top: 24px;
+}
+
+.dashboard-card .card-content {
+  z-index: 2;
+}
+
+.dashboard-card .card-title {
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin-bottom: 6px;
+  letter-spacing: 0.5px;
+}
+
+.dashboard-card .card-value {
+  font-size: 2.1rem;
+  font-weight: 800;
+  letter-spacing: 1px;
+  margin-bottom: 0;
+}
+
+@media (max-width: 991px) {
+  .dashboard-cards-row {
+    flex-direction: column;
+    gap: 16px;
+  }
+  .dashboard-card {
+    padding: 24px 16px;
+  }
+} 
