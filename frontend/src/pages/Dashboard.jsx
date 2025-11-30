@@ -77,14 +77,14 @@ const Dashboard = () => {
         <div className="dashboard-card bg-warning">
           <div className="card-content">
             <div className="card-title">Monthly Income</div>
-            <div className="card-value">Ksh{dashboardData?.financialSummary?.currentMonth?.income.toLocaleString() || 0}</div>
+            <div className="card-value">PKR{dashboardData?.financialSummary?.currentMonth?.income.toLocaleString() || 0}</div>
           </div>
           <span className="card-icon bi bi-wallet2"></span>
         </div>
         <div className="dashboard-card bg-danger">
           <div className="card-content">
             <div className="card-title">Monthly Expenses</div>
-            <div className="card-value">Ksh{dashboardData?.financialSummary?.currentMonth?.expenses.toLocaleString() || 0}</div>
+            <div className="card-value">PKR{dashboardData?.financialSummary?.currentMonth?.expenses.toLocaleString() || 0}</div>
           </div>
           <span className="card-icon bi bi-cash-stack"></span>
         </div>
@@ -107,7 +107,7 @@ const Dashboard = () => {
                           <strong>{expense.title}</strong> - {expense.category}
                           <div className="text-muted small">{new Date(expense.date).toLocaleDateString()}</div>
                         </div>
-                        <span className="badge bg-danger rounded-pill">Ksh{expense.amount.toLocaleString()}</span>
+                        <span className="badge bg-danger rounded-pill">PKR{expense.amount.toLocaleString()}</span>
                       </li>
                     ))}
                   </ul>
@@ -126,7 +126,7 @@ const Dashboard = () => {
                           <strong>{income.title}</strong> - {income.category}
                           <div className="text-muted small">{new Date(income.date).toLocaleDateString()}</div>
                         </div>
-                        <span className="badge bg-success rounded-pill">Ksh{income.amount.toLocaleString()}</span>
+                        <span className="badge bg-success rounded-pill">PKR{income.amount.toLocaleString()}</span>
                       </li>
                     ))}
                   </ul>
@@ -149,18 +149,18 @@ const Dashboard = () => {
               
               <div className="d-flex justify-content-between mb-2">
                 <span>Income:</span>
-                <strong className="text-success">Ksh{dashboardData?.financialSummary?.currentMonth?.income.toLocaleString() || 0}</strong>
+                <strong className="text-success">PKR{dashboardData?.financialSummary?.currentMonth?.income.toLocaleString() || 0}</strong>
               </div>
               
               <div className="d-flex justify-content-between mb-2">
                 <span>Expenses:</span>
-                <strong className="text-danger">Ksh{dashboardData?.financialSummary?.currentMonth?.expenses.toLocaleString() || 0}</strong>
+                <strong className="text-danger">PKR{dashboardData?.financialSummary?.currentMonth?.expenses.toLocaleString() || 0}</strong>
               </div>
               
               <div className="d-flex justify-content-between mb-2">
                 <span>Profit:</span>
                 <strong className={dashboardData?.financialSummary?.currentMonth?.profit >= 0 ? "text-success" : "text-danger"}>
-                  Ksh{dashboardData?.financialSummary?.currentMonth?.profit.toLocaleString() || 0}
+                  PKR{dashboardData?.financialSummary?.currentMonth?.profit.toLocaleString() || 0}
                 </strong>
               </div>
             </Card.Body>

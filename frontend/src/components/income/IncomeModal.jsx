@@ -126,7 +126,7 @@ const IncomeModal = ({ show, onHide, income, isEdit, employees }) => {
             
             <Col md={6}>
               <Form.Group className="mb-3">
-                <Form.Label>Amount (Ksh)</Form.Label>
+                <Form.Label>Amount (PKR)</Form.Label>
                 <Form.Control 
                   type="number" 
                   name="amount"

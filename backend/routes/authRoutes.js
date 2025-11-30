@@ -14,13 +14,17 @@ const {
   verifyMFASetup,
   disableMFA,
   generateBackupCodes,
-  logout
+  logout,
+  forgotPassword,
+  resetPassword
 } = require('../controllers/authController');
 const { protect, checkRole } = require('../middleware/auth');
 
 // Public routes
 router.post('/register', register);
 router.post('/login', login);
+router.post('/forgot-password', forgotPassword);
+router.post('/reset-password', resetPassword);
 
 // Protected routes (require authentication)
 router.get('/me', protect, getMe);

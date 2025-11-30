@@ -1,8 +1,8 @@
 import api from './api';
 
-// Get all employees
-const getEmployees = async () => {
-  const response = await api.get('/employees');
+// Get all employees (supports optional filters via query params)
+const getEmployees = async (params = {}) => {
+  const response = await api.get('/employees', { params });
   return response.data;
 };
 
@@ -42,6 +42,12 @@ const deleteDocument = async (employeeId, documentId) => {
   return response.data;
 };
 
+// Get employee statistics
+const getStats = async () => {
+  const response = await api.get('/employees/stats');
+  return response.data;
+};
+
 const employeeService = {
   getEmployees,
   getEmployee,
@@ -49,7 +55,8 @@ const employeeService = {
   updateEmployee,
   deleteEmployee,
   uploadDocument,
-  deleteDocument
+  deleteDocument,
+  getStats
 };
 
 export default employeeService;

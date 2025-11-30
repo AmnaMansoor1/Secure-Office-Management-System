@@ -6,6 +6,8 @@ import expenseReducer from './slices/expenseSlice';
 import incomeReducer from './slices/incomeSlice';
 import taskReducer from './slices/taskSlice';
 import notificationReducer from './slices/notificationSlice';
+import attendanceReducer from '../features/attendance/attendanceSlice';
+import leaveReducer from '../features/leave/leaveSlice';
 
 export const store = configureStore({
   reducer: {
@@ -15,7 +17,9 @@ export const store = configureStore({
     expenses: expenseReducer,
     income: incomeReducer,
     tasks: taskReducer,
-    notifications: notificationReducer
+    notifications: notificationReducer,
+    attendance: attendanceReducer,
+    leave: leaveReducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({

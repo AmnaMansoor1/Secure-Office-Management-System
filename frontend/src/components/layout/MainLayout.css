@@ -1,28 +1,52 @@
 /* MainLayout.css */
 .layout-container {
-    display: flex;
-    min-height: 100vh;
+  display: flex;
+  min-height: 100vh;
+}
+
+.main-layout {
+  display: flex;
+}
+
+/* Only add left margin when the app has a sidebar */
+.has-sidebar .content-col {
+  margin-left: 240px;
+  transition: margin-left 0.2s ease;
+}
+
+/* When sidebar is collapsed, remove the margin */
+.has-sidebar.sidebar-collapsed .content-col {
+  margin-left: 0;
+}
+
+/* Optional helper if main-content class is used elsewhere */
+.has-sidebar .main-content {
+  margin-left: 240px;
+  width: calc(100% - 240px);
+  transition: margin-left 0.2s ease, width 0.2s ease;
+}
+
+.has-sidebar.sidebar-collapsed .main-content,
+.sidebar.collapsed ~ .main-content,
+.main-layout .main-content.sidebar-collapsed {
+  margin-left: 0;
+  width: 100%;
+}
+
+/* Dragging state can temporarily disable pointer events to improve UX */
+.main-content.dragging,
+.sidebar.dragging ~ .content-col {
+  pointer-events: none;
+}
+
+/* Spacing inside pages */
+.content-area {
+  padding: 20px;
+}
+
+/* Responsive: on small screens, sidebar may be hidden or overlayed */
+@media (max-width: 768px) {
+  .content-col {
+    margin-left: 0;
   }
-  
-  .main-content {
-    margin-left: 240px;
-    width: calc(100% - 240px);
-    min-height: 100vh;
-    transition: all 0.3s ease;
-  }
-  
-  .main-content-full {
-    width: 100%;
-    min-height: 100vh;
-  }
-  
-  .content-area {
-    padding: 20px;
-  }
-  
-  @media (max-width: 768px) {
-    .main-content {
-      margin-left: 0;
-      width: 100%;
-    }
-  }
+}

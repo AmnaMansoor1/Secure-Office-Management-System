@@ -166,7 +166,7 @@ const AssetModal = ({ show, onHide, asset, isEdit, employees }) => {
           <Row>
             <Col md={6}>
               <Form.Group className="mb-3">
-                <Form.Label>Purchase Price (Ksh)</Form.Label>
+                <Form.Label>Purchase Price (PKR)</Form.Label>
                 <Form.Control 
                   type="number" 
                   name="purchasePrice"

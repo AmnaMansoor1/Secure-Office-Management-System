@@ -70,6 +70,35 @@ const userSchema = new mongoose.Schema({
       upload: { type: Boolean, default: false },
       download: { type: Boolean, default: false },
       delete: { type: Boolean, default: false }
+    },
+    // Added modules
+    attendance: {
+      view: { type: Boolean, default: false },
+      create: { type: Boolean, default: false },
+      update: { type: Boolean, default: false },
+      delete: { type: Boolean, default: false },
+      manage: { type: Boolean, default: false }
+    },
+    leave: {
+      view: { type: Boolean, default: false },
+      create: { type: Boolean, default: false },
+      update: { type: Boolean, default: false },
+      delete: { type: Boolean, default: false },
+      manage: { type: Boolean, default: false }
+    },
+    // Newly added modules to persist role defaults
+    performance: {
+      view: { type: Boolean, default: false },
+      create: { type: Boolean, default: false },
+      update: { type: Boolean, default: false },
+      delete: { type: Boolean, default: false }
+    },
+    events: {
+      view: { type: Boolean, default: false },
+      create: { type: Boolean, default: false },
+      update: { type: Boolean, default: false },
+      delete: { type: Boolean, default: false },
+      manage: { type: Boolean, default: false }
     }
   },
   isActive: {
@@ -135,7 +164,9 @@ userSchema.pre('save', function(next) {
         income: { view: true, create: true, update: true, delete: true },
         analytics: { view: true },
         tasks: { view: true, create: true, update: true, delete: true, manage: true },
-        files: { view: true, upload: true, download: true, delete: true }
+        files: { view: true, upload: true, download: true, delete: true },
+        attendance: { view: true, create: true, update: true, delete: true, manage: true },
+        leave: { view: true, create: true, update: true, delete: true, manage: true }
       };
     } else if (this.role === 'manager') {
       // Manager has view permissions for everything, create/update for most things
@@ -146,7 +177,9 @@ userSchema.pre('save', function(next) {
         income: { view: true, create: true, update: true, delete: false },
         analytics: { view: true },
         tasks: { view: true, create: true, update: true, delete: false, manage: true },
-        files: { view: true, upload: true, download: true, delete: false }
+        files: { view: true, upload: true, download: true, delete: false },
+        attendance: { view: true, create: true, update: true, delete: false, manage: true },
+        leave: { view: true, create: true, update: true, delete: false, manage: true }
       };
     } else {
       // Regular employee has limited permissions
@@ -157,7 +190,9 @@ userSchema.pre('save', function(next) {
         income: { view: true, create: false, update: false, delete: false },
         analytics: { view: false },
         tasks: { view: true, create: false, update: true, delete: false, manage: false },
-        files: { view: true, upload: true, download: true, delete: true }
+        files: { view: true, upload: true, download: true, delete: true },
+        attendance: { view: true, create: true, update: false, delete: false, manage: false },
+        leave: { view: true, create: true, update: false, delete: false, manage: false }
       };
     }
   }

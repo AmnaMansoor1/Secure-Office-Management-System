@@ -11,6 +11,9 @@ const Login = () => {
           <Card.Body className="p-4">
             <LoginForm />
             <div className="text-center mt-3">
+              <p>
+                <Link to="/forgot-password">Forgot password?</Link>
+              </p>
               <p>Don't have an account? <Link to="/register">Register</Link></p>
             </div>
           </Card.Body>

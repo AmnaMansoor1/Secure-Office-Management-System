@@ -38,6 +38,14 @@ const Header = () => {
   const isActive = (path) => {
     return location.pathname === path;
   };
+
+  // Toggle sidebar collapsed state via a custom event
+  const toggleSidebar = () => {
+    const current = localStorage.getItem('sidebarCollapsed') === 'true';
+    const next = !current;
+    // Persist and notify Sidebar (which will dispatch the collapsed-change event)
+    window.dispatchEvent(new CustomEvent('sidebar:set-collapsed', { detail: { collapsed: next } }));
+  };
   
   return (
     <div className="header">
@@ -114,6 +122,15 @@ const Header = () => {
           </ul>
           
           <div className="header-actions">
+            {/* Sidebar toggle button */}
+            <button 
+              className="notification-btn" 
+              title="Toggle Sidebar"
+              onClick={toggleSidebar}
+            >
+              <i className="bi bi-layout-sidebar"></i>
+            </button>
+
             <NotificationBell />
             
             <div className="user-dropdown">

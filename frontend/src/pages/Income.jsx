@@ -166,7 +166,7 @@ const Income = () => {
             <Card.Body>
               <Row>
                 <Col md={4} className="mb-3 mb-md-0">
-                  <h5>Total: Ksh{totalIncome.toLocaleString()}</h5>
+                  <h5>Total: PKR{totalIncome.toLocaleString()}</h5>
                 </Col>
                 <Col md={8}>
                   <Row>
@@ -249,7 +249,7 @@ const Income = () => {
                           <td>{income.title}</td>
                           <td>{income.category}</td>
                           <td>{new Date(income.date).toLocaleDateString()}</td>
-                          <td>Ksh{income.amount.toLocaleString()}</td>
+                          <td>PKR{income.amount.toLocaleString()}</td>
                           <td>{income.client || '-'}</td>
                           <td>{income.paymentMethod}</td>
                           <td>{income.receivedBy ? getEmployeeName(income.receivedBy) : '-'}</td>

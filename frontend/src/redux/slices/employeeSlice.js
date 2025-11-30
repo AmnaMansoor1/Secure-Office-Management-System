@@ -5,18 +5,37 @@ import employeeService from '../../services/employeeService';
 const initialState = {
   employees: [],
   employee: null,
+  stats: { total: 0, admins: 0, managers: 0, employees: 0 },
   isLoading: false,
   isSuccess: false,
   isError: false,
   message: ''
 };
 
-// Get all employees
+// Get all employees (with optional filters)
 export const getEmployees = createAsyncThunk(
   'employees/getAll',
+  async (params = {}, thunkAPI) => {
+    try {
+      return await employeeService.getEmployees(params);
+    } catch (error) {
+      const message = 
+        (error.response && 
+          error.response.data && 
+          error.response.data.message) ||
+        error.message ||
+        error.toString();
+      return thunkAPI.rejectWithValue(message);
+    }
+  }
+);
+
+// Get employee stats
+export const getEmployeeStats = createAsyncThunk(
+  'employees/getStats',
   async (_, thunkAPI) => {
     try {
-      return await employeeService.getEmployees();
+      return await employeeService.getStats();
     } catch (error) {
       const message = 
         (error.response && 
@@ -164,6 +183,19 @@ export const employeeSlice = createSlice({
         state.employees = action.payload;
       })
       .addCase(getEmployees.rejected, (state, action) => {
+        state.isLoading = false;
+        state.isError = true;
+        state.message = action.payload;
+      })
+      .addCase(getEmployeeStats.pending, (state) => {
+        state.isLoading = true;
+      })
+      .addCase(getEmployeeStats.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.isSuccess = true;
+        state.stats = action.payload;
+      })
+      .addCase(getEmployeeStats.rejected, (state, action) => {
         state.isLoading = false;
         state.isError = true;
         state.message = action.payload;

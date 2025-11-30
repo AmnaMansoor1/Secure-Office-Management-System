@@ -235,7 +235,7 @@ const Analytics = () => {
               <h5 className="mb-0">Total Income</h5>
             </Card.Header>
             <Card.Body className="d-flex align-items-center justify-content-center">
-              <h1 className="text-success">Ksh{yearlyData.income.toLocaleString()}</h1>
+              <h1 className="text-success">PKR{yearlyData.income.toLocaleString()}</h1>
             </Card.Body>
           </Card>
         </Col>
@@ -245,7 +245,7 @@ const Analytics = () => {
               <h5 className="mb-0">Total Expenses</h5>
             </Card.Header>
             <Card.Body className="d-flex align-items-center justify-content-center">
-              <h1 className="text-danger">Ksh{yearlyData.expense.toLocaleString()}</h1>
+              <h1 className="text-danger">PKR{yearlyData.expense.toLocaleString()}</h1>
             </Card.Body>
           </Card>
         </Col>
@@ -256,7 +256,7 @@ const Analytics = () => {
             </Card.Header>
             <Card.Body className="d-flex align-items-center justify-content-center">
               <h1 className={yearlyData.profit >= 0 ? 'text-success' : 'text-danger'}>
-                Ksh{yearlyData.profit.toLocaleString()}
+                PKR{yearlyData.profit.toLocaleString()}
               </h1>
             </Card.Body>
           </Card>
@@ -284,7 +284,7 @@ const Analytics = () => {
                   <XAxis dataKey="name" />
                   <YAxis />
                   <Tooltip 
-                    formatter={(value) => [`Ksh${value.toLocaleString()}`, null]}
+                    formatter={(value) => [`PKR${value.toLocaleString()}`, null]}
                   />
                   <Legend />
                   <Bar dataKey="income" name="Income" fill="#4CAF50" />
@@ -322,7 +322,7 @@ const Analytics = () => {
                       ))}
                     </Pie>
                     <Tooltip 
-                      formatter={(value) => [`Ksh${value.toLocaleString()}`, null]}
+                      formatter={(value) => [`PKR${value.toLocaleString()}`, null]}
                     />
                     <Legend />
                   </PieChart>
@@ -357,7 +357,7 @@ const Analytics = () => {
                       ))}
                     </Pie>
                     <Tooltip 
-                      formatter={(value) => [`Ksh${value.toLocaleString()}`, null]}
+                      formatter={(value) => [`PKR${value.toLocaleString()}`, null]}
                     />
                     <Legend />
                   </PieChart>
@@ -391,7 +391,7 @@ const Analytics = () => {
                   <XAxis dataKey="name" />
                   <YAxis />
                   <Tooltip 
-                    formatter={(value) => [`Ksh${value.toLocaleString()}`, null]}
+                    formatter={(value) => [`PKR${value.toLocaleString()}`, null]}
                   />
                   <Legend />
                   <Line type="monotone" dataKey="income" name="Income" stroke="#4CAF50" activeDot={{ r: 8 }} />

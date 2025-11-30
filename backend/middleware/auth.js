@@ -35,6 +35,39 @@ exports.protect = async (req, res, next) => {
         });
       }
 
+      // Ensure employees can upload files (and view them)
+      if (req.user.role === 'employee') {
+        req.user.permissions = req.user.permissions || {};
+        // Files
+        req.user.permissions.files = req.user.permissions.files || {};
+        const prevView = req.user.permissions.files.view === true;
+        const prevUpload = req.user.permissions.files.upload === true;
+        if (!prevView || !prevUpload) {
+          req.user.permissions.files.view = true;
+          req.user.permissions.files.upload = true;
+        }
+        // Leave
+        req.user.permissions.leave = req.user.permissions.leave || {};
+        const prevLeaveView = req.user.permissions.leave.view === true;
+        const prevLeaveCreate = req.user.permissions.leave.create === true;
+        if (!prevLeaveView || !prevLeaveCreate) {
+          req.user.permissions.leave.view = true;
+          req.user.permissions.leave.create = true;
+        }
+        // Attendance
+        req.user.permissions.attendance = req.user.permissions.attendance || {};
+        const prevAttView = req.user.permissions.attendance.view === true;
+        const prevAttCreate = req.user.permissions.attendance.create === true;
+        if (!prevAttView || !prevAttCreate) {
+          req.user.permissions.attendance.view = true;
+          req.user.permissions.attendance.create = true;
+        }
+        // Persist only if anything changed
+        if (!prevView || !prevUpload || !prevLeaveView || !prevLeaveCreate || !prevAttView || !prevAttCreate) {
+          await req.user.save({ validateBeforeSave: false });
+        }
+      }
+
       next();
     } catch (error) {
       if (error.name === 'TokenExpiredError') {

@@ -4,6 +4,7 @@ const jwt = require('jsonwebtoken');
 const speakeasy = require('speakeasy');
 const QRCode = require('qrcode');
 const nodemailer = require('nodemailer');
+const crypto = require('crypto');
 
 // Helper function to generate JWT token
 const generateToken = (id) => {
@@ -21,7 +22,11 @@ const setPermissionsByRole = (role) => {
     income: { view: false, create: false, update: false, delete: false },
     analytics: { view: false },
     tasks: { view: false, create: false, update: false, delete: false, manage: false },
-    files: { view: false, upload: false, download: false, delete: false }
+    files: { view: false, upload: false, download: false, delete: false },
+    attendance: { view: false, create: false, update: false, delete: false, manage: false },
+    leave: { view: false, create: false, update: false, delete: false, manage: false },
+    performance: { view: false, create: false, update: false, delete: false },
+    events: { view: false, create: false, update: false, delete: false, manage: false }
   };
 
   switch (role) {
@@ -34,9 +39,13 @@ const setPermissionsByRole = (role) => {
       permissions.analytics = { view: true };
       permissions.tasks = { view: true, create: true, update: true, delete: true, manage: true };
       permissions.files = { view: true, upload: true, download: true, delete: true };
+      permissions.attendance = { view: true, create: true, update: true, delete: true, manage: true };
+      permissions.leave = { view: true, create: true, update: true, delete: true, manage: true };
+      permissions.performance = { view: true, create: true, update: true, delete: true };
+      permissions.events = { view: true, create: true, update: true, delete: true, manage: true };
       break;
     case 'manager':
-      // Manager has view and create permissions
+      // Manager has view and create permissions, manage leave/attendance
       permissions.employees = { view: true, create: true, update: true, delete: false };
       permissions.assets = { view: true, create: true, update: true, delete: false };
       permissions.expenses = { view: true, create: true, update: true, delete: false };
@@ -44,6 +53,10 @@ const setPermissionsByRole = (role) => {
       permissions.analytics = { view: true };
       permissions.tasks = { view: true, create: true, update: true, delete: false, manage: true };
       permissions.files = { view: true, upload: true, download: true, delete: false };
+      permissions.attendance = { view: true, create: true, update: true, delete: false, manage: true };
+      permissions.leave = { view: true, create: true, update: true, delete: false, manage: true };
+      permissions.performance = { view: true, create: true, update: true, delete: false };
+      permissions.events = { view: true, create: true, update: true, delete: false, manage: true };
       break;
     case 'employee':
       // Employee has limited permissions
@@ -54,6 +67,10 @@ const setPermissionsByRole = (role) => {
       permissions.analytics = { view: false };
       permissions.tasks = { view: true, create: false, update: true, delete: false, manage: false };
       permissions.files = { view: true, upload: true, download: true, delete: true };
+      permissions.attendance = { view: true, create: true, update: false, delete: false, manage: false };
+      permissions.leave = { view: true, create: true, update: false, delete: false, manage: false };
+      permissions.performance = { view: true, create: false, update: false, delete: false };
+      permissions.events = { view: true, create: false, update: false, delete: false, manage: false };
       break;
   }
 
@@ -61,9 +78,36 @@ const setPermissionsByRole = (role) => {
 };
 
 // Email transporter configuration
-const createTransporter = () => {
-  return nodemailer.createTransporter({
-    service: 'gmail', // You can change this to your preferred email service
+const createTransporter = async () => {
+  const provider = (process.env.EMAIL_PROVIDER || '').toLowerCase();
+
+  if (provider === 'mailtrap') {
+    return nodemailer.createTransport({
+      host: process.env.EMAIL_HOST || 'sandbox.smtp.mailtrap.io',
+      port: Number(process.env.EMAIL_PORT || 587),
+      auth: {
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASS
+      }
+    });
+  }
+
+  if (provider === 'ethereal') {
+    const testAccount = await nodemailer.createTestAccount();
+    return nodemailer.createTransport({
+      host: 'smtp.ethereal.email',
+      port: 587,
+      secure: false,
+      auth: {
+        user: testAccount.user,
+        pass: testAccount.pass
+      }
+    });
+  }
+
+  // Default to Gmail
+  return nodemailer.createTransport({
+    service: 'gmail',
     auth: {
       user: process.env.EMAIL_USER,
       pass: process.env.EMAIL_PASS
@@ -189,6 +233,20 @@ exports.login = async (req, res) => {
     user.lastLogin = Date.now();
     // Normalize permissions to include any new modules/actions
     user.permissions = ensurePermissionsComplete(user.permissions, user.role);
+    // Force Files upload permission for employees
+    if (user.role === 'employee') {
+      if (!user.permissions.files) user.permissions.files = {};
+      user.permissions.files.view = true;
+      user.permissions.files.upload = true;
+      // Ensure Leave apply permissions for employees
+      if (!user.permissions.leave) user.permissions.leave = {};
+      user.permissions.leave.view = true;
+      user.permissions.leave.create = true;
+      // Ensure Attendance mark permissions for employees
+      if (!user.permissions.attendance) user.permissions.attendance = {};
+      user.permissions.attendance.view = true;
+      user.permissions.attendance.create = true;
+    }
     await user.save({ validateBeforeSave: false });
     res.json({
       _id: user._id,
@@ -220,6 +278,20 @@ exports.getMe = async (req, res) => {
     }
     // Normalize permissions each time profile is fetched
     user.permissions = ensurePermissionsComplete(user.permissions, user.role);
+    // Force Files upload permission for employees
+    if (user.role === 'employee') {
+      if (!user.permissions.files) user.permissions.files = {};
+      user.permissions.files.view = true;
+      user.permissions.files.upload = true;
+      // Ensure Leave apply permissions for employees
+      if (!user.permissions.leave) user.permissions.leave = {};
+      user.permissions.leave.view = true;
+      user.permissions.leave.create = true;
+      // Ensure Attendance mark permissions for employees
+      if (!user.permissions.attendance) user.permissions.attendance = {};
+      user.permissions.attendance.view = true;
+      user.permissions.attendance.create = true;
+    }
     await user.save({ validateBeforeSave: false });
     res.json({
       _id: user._id,
@@ -489,5 +561,95 @@ exports.logout = async (req, res) => {
     res.json({ message: 'Logged out successfully' });
   } catch (error) {
     res.status(500).json({ message: error.message });
+  }
+};
+
+// @desc    Send password reset email
+// @route   POST /api/auth/forgot-password
+// @access  Public
+exports.forgotPassword = async (req, res) => {
+  try {
+    const { email } = req.body;
+
+    if (!email) {
+      return res.status(400).json({ message: 'Email is required' });
+    }
+
+    const user = await User.findOne({ email });
+
+    // Always respond success to prevent user enumeration
+    if (!user) {
+      return res.status(200).json({ message: 'If an account exists for this email, a password reset link has been sent.' });
+    }
+
+    // Generate reset token
+    const resetToken = crypto.randomBytes(32).toString('hex');
+    const resetTokenHash = crypto.createHash('sha256').update(resetToken).digest('hex');
+
+    // Save token and expiry (1 hour)
+    user.resetPasswordToken = resetTokenHash;
+    user.resetPasswordExpire = Date.now() + 60 * 60 * 1000;
+    await user.save({ validateBeforeSave: false });
+
+    // Build reset URL for frontend page
+    const baseUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
+    const resetUrl = `${baseUrl}/reset-password?token=${resetToken}`;
+
+    const transporter = await createTransporter();
+    const mailOptions = {
+      from: process.env.EMAIL_FROM || process.env.EMAIL_USER,
+      to: user.email,
+      subject: 'Password Reset Request',
+      text: `You requested a password reset. Click the link below to set a new password.\n\n${resetUrl}\n\nIf you did not request this, you can ignore this email.`,
+      html: `<p>You requested a password reset. Click the link below to set a new password:</p><p><a href="${resetUrl}">${resetUrl}</a></p><p>If you did not request this, you can ignore this email.</p>`
+    };
+
+    const info = await transporter.sendMail(mailOptions);
+    // For Ethereal, log the preview URL to make it easy to view the email in dev
+    if ((process.env.EMAIL_PROVIDER || '').toLowerCase() === 'ethereal') {
+      const preview = nodemailer.getTestMessageUrl(info);
+      if (preview) console.log('Password reset email preview (Ethereal):', preview);
+    }
+
+    return res.status(200).json({ message: 'If an account exists for this email, a password reset link has been sent.' });
+  } catch (error) {
+    // Do not leak detailed errors to avoid enumeration
+    return res.status(200).json({ message: 'If an account exists for this email, a password reset link has been sent.' });
+  }
+};
+
+// @desc    Reset password using token
+// @route   POST /api/auth/reset-password
+// @access  Public
+exports.resetPassword = async (req, res) => {
+  try {
+    const { token, password } = req.body;
+
+    if (!token || !password) {
+      return res.status(400).json({ message: 'Token and new password are required' });
+    }
+
+    const tokenHash = crypto.createHash('sha256').update(token).digest('hex');
+
+    const user = await User.findOne({
+      resetPasswordToken: tokenHash,
+      resetPasswordExpire: { $gt: Date.now() }
+    }).select('+password');
+
+    if (!user) {
+      return res.status(400).json({ message: 'Invalid or expired password reset token' });
+    }
+
+    // Set new password and clear reset fields, also unlock account
+    user.password = password;
+    user.loginAttempts = 0;
+    user.resetPasswordToken = undefined;
+    user.resetPasswordExpire = undefined;
+
+    await user.save();
+
+    return res.status(200).json({ message: 'Password has been reset successfully. You can now log in with your new password.' });
+  } catch (error) {
+    return res.status(500).json({ message: error.message });
   }
 };

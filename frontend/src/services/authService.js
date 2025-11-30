@@ -15,6 +15,9 @@ api.interceptors.request.use(
     if (user?.token) {
       config.headers.Authorization = `Bearer ${user.token}`;
     }
+    // Ensure auth endpoints are never cached
+    config.headers['Cache-Control'] = 'no-cache';
+    config.headers['Pragma'] = 'no-cache';
     return config;
   },
   (error) => {
@@ -55,9 +58,9 @@ const logout = async () => {
   }
 };
 
-// Get user profile
+// Get user profile (bypass cache)
 const getProfile = async () => {
-  const response = await api.get('me');
+  const response = await api.get('me', { params: { t: Date.now() } });
   return response.data;
 };
 
@@ -91,6 +94,18 @@ const generateBackupCodes = async (data) => {
   return response.data;
 };
 
+// Forgot Password
+const forgotPassword = async (email) => {
+  const response = await api.post('forgot-password', { email });
+  return response.data;
+};
+
+// Reset Password
+const resetPassword = async ({ token, password }) => {
+  const response = await api.post('reset-password', { token, password });
+  return response.data;
+};
+
 // Get all users (admin only)
 const getUsers = async () => {
   const response = await api.get('users');
@@ -107,6 +122,8 @@ const authService = {
   verifyMFASetup,
   disableMFA,
   generateBackupCodes,
+  forgotPassword,
+  resetPassword,
   getUsers
 };
 

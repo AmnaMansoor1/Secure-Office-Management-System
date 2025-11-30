@@ -14,11 +14,16 @@ import Profile from './pages/Profile';
 import Users from './pages/Users';
 import Tasks from './pages/Tasks';
 import Files from './pages/Files';
+import AttendanceLeave from './pages/AttendanceLeave';
 import ProtectedRoute from './components/common/ProtectedRoute';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import 'bootstrap-icons/font/bootstrap-icons.css';
 import './assets/styles/main.css';
 import './assets/styles/dashboard.css';
+import ForgotPassword from './pages/ForgotPassword';
+import ResetPassword from './pages/ResetPassword';
+import Performance from './pages/Performance';
+import Meetings from './pages/Meetings';
 
 function App() {
   const { user } = useSelector((state) => state.auth);
@@ -31,6 +36,8 @@ function App() {
           <Route index element={user ? <Navigate to="/dashboard" replace /> : <Navigate to="/login" replace />} />
           <Route path="login" element={<Login />} />
           <Route path="register" element={<Register />} />
+          <Route path="forgot-password" element={<ForgotPassword />} />
+          <Route path="reset-password" element={<ResetPassword />} />
         
           {/* Protected routes */}
           <Route element={<ProtectedRoute />}>
@@ -42,6 +49,13 @@ function App() {
             <Route path="expenses" element={<Expenses />} />
             <Route path="income" element={<Income />} />
             <Route path="analytics" element={<Analytics />} />
+            <Route path="attendance" element={<AttendanceLeave />} />
+            <Route path="leave" element={<AttendanceLeave />} />
+            <Route
+              path="performance"
+              element={<Performance />}
+            />
+            <Route path="meetings" element={<Meetings />} />
             <Route path="profile" element={<Profile />} />
             <Route path="users" element={<Users />} />
           </Route>

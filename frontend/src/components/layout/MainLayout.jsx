@@ -4,13 +4,46 @@ import Header from './Header';
 import Sidebar from './Sidebar';
 import { useSelector, useDispatch } from 'react-redux';
 import './MainLayout.css'; // Add this CSS file for custom styling
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import authService from '../../services/authService';
 import { login } from '../../redux/slices/authSlice';
 
 const MainLayout = () => {
   const { user } = useSelector((state) => state.auth);
   const dispatch = useDispatch();
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(() => {
+    return localStorage.getItem('sidebarCollapsed') === 'true';
+  });
+  
+  // Listen to custom event from Sidebar when collapsed changes
+  useEffect(() => {
+    const handler = (e) => {
+      if (e?.detail?.collapsed !== undefined) {
+        setSidebarCollapsed(!!e.detail.collapsed);
+      }
+    };
+    window.addEventListener('sidebar:collapsed-change', handler);
+    return () => window.removeEventListener('sidebar:collapsed-change', handler);
+  }, []);
+
+  // Apply body class for collapsed state (used by CSS to shift content)
+  useEffect(() => {
+    if (sidebarCollapsed) {
+      document.body.classList.add('sidebar-collapsed');
+    } else {
+      document.body.classList.remove('sidebar-collapsed');
+    }
+  }, [sidebarCollapsed]);
+  
+  // Indicate presence of sidebar (only when logged in) for CSS margins
+  useEffect(() => {
+    if (user) {
+      document.body.classList.add('has-sidebar');
+    } else {
+      document.body.classList.remove('has-sidebar');
+      document.body.classList.remove('sidebar-collapsed');
+    }
+  }, [!!user]);
   
   // Refresh user profile to get latest permissions (e.g., files module)
   useEffect(() => {
@@ -38,11 +71,11 @@ const MainLayout = () => {
       <Container fluid className="flex-grow-1">
         <Row className="h-100">
           {user && (
-            <Col md={3} lg={2} className="sidebar-col p-0 d-md-block">
+            <Col md={3} lg={2} className="sidebar-col p-0">
               <Sidebar />
             </Col>
           )}
-          <Col md={user ? 9 : 12} lg={user ? 10 : 12} className="py-3 content-col">
+          <Col md={user ? 9 : 12} lg={user ? 10 : 12} className={`py-3 content-col`}>
             <Outlet />
           </Col>
         </Row>

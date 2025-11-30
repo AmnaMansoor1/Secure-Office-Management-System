@@ -16,6 +16,10 @@ const authRoutes = require('./routes/authRoutes');
 const taskRoutes = require('./routes/taskRoutes');
 const notificationRoutes = require('./routes/notificationRoutes');
 const fileRoutes = require('./routes/fileRoutes');
+const attendanceRoutes = require('./routes/attendanceRoutes');
+const leaveRoutes = require('./routes/leaveRoutes');
+const performanceRoutes = require('./routes/performanceRoutes');
+const eventRoutes = require('./routes/eventRoutes');
 
 const app = express();
 
@@ -40,6 +44,10 @@ app.use('/api/auth', authRoutes);
 app.use('/api/tasks', taskRoutes);
 app.use('/api/notifications', notificationRoutes);
 app.use('/api/files', fileRoutes);
+app.use('/api/attendance', attendanceRoutes);
+app.use('/api/leave', leaveRoutes);
+app.use('/api/performance', performanceRoutes);
+app.use('/api/events', eventRoutes);
 
 // Error handling middleware
 app.use(errorHandler);

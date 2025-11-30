@@ -9,7 +9,8 @@ const {
   deleteEmployee,
   uploadDocument,
   deleteDocument,
-  updateRole
+  updateRole,
+  getEmployeeStats
 } = require('../controllers/employeeController');
 const { protect, checkPermission } = require('../middleware/auth');
 
@@ -17,6 +18,9 @@ const { protect, checkPermission } = require('../middleware/auth');
 router.route('/')
   .get(protect, checkPermission('employees', 'view'), getEmployees)
   .post(protect, checkPermission('employees', 'create'), createEmployee);
+
+router.route('/stats')
+  .get(protect, checkPermission('employees', 'view'), getEmployeeStats);
 
 router.route('/:id')
   .get(protect, checkPermission('employees', 'view'), getEmployeeById)

@@ -1,12 +1,34 @@
 // controllers/employeeController.js
 const Employee = require('../models/Employee');
 
-// @desc    Get all employees
+// @desc    Get all employees (with search & filters)
 // @route   GET /api/employees
 // @access  Public
 exports.getEmployees = async (req, res) => {
   try {
-    const employees = await Employee.find();
+    const { q, department, role, isActive } = req.query;
+
+    const filter = {};
+    if (q) {
+      const regex = new RegExp(q, 'i');
+      filter.$or = [
+        { name: regex },
+        { email: regex },
+        { position: regex },
+        { department: regex }
+      ];
+    }
+    if (department) {
+      filter.department = department;
+    }
+    if (role) {
+      filter.role = role;
+    }
+    if (typeof isActive !== 'undefined') {
+      filter.isActive = isActive === 'true';
+    }
+
+    const employees = await Employee.find(filter);
     res.json(employees);
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -153,6 +175,22 @@ exports.updateRole = async (req, res) => {
     }
     
     res.json({ message: 'Role updated successfully', employee });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// @desc    Get employee statistics
+// @route   GET /api/employees/stats
+// @access  Private
+exports.getEmployeeStats = async (req, res) => {
+  try {
+    const total = await Employee.countDocuments();
+    const admins = await Employee.countDocuments({ role: 'admin' });
+    const managers = await Employee.countDocuments({ role: 'manager' });
+    const employees = await Employee.countDocuments({ role: 'employee' });
+
+    res.json({ total, admins, managers, employees });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
