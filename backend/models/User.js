@@ -166,7 +166,8 @@ userSchema.pre('save', function(next) {
         tasks: { view: true, create: true, update: true, delete: true, manage: true },
         files: { view: true, upload: true, download: true, delete: true },
         attendance: { view: true, create: true, update: true, delete: true, manage: true },
-        leave: { view: true, create: true, update: true, delete: true, manage: true }
+        leave: { view: true, create: true, update: true, delete: true, manage: true },
+        events: { view: true, create: true, update: true, delete: true, manage: true }
       };
     } else if (this.role === 'manager') {
       // Manager has view permissions for everything, create/update for most things

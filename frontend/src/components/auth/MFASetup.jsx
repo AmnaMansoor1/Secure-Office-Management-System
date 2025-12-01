@@ -1,7 +1,7 @@
 // src/components/auth/MFASetup.jsx
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Card, Button, Alert, Form, Row, Col, Modal } from 'react-bootstrap';
-import { useDispatch, useSelector } from 'react-redux';
+import { useSelector } from 'react-redux';
 import authService from '../../services/authService';
 
 const MFASetup = ({ show, onHide, onSuccess }) => {

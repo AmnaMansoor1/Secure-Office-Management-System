@@ -1,18 +1,23 @@
 // src/pages/Meetings.jsx
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { useSelector } from 'react-redux';
 import { Container, Row, Col, Card, Table, Button, Form, Alert } from 'react-bootstrap';
+import ConfirmModal from '../components/common/ConfirmModal';
 import eventService from '../services/eventService';
 
 const Meetings = () => {
   const { user } = useSelector((state) => state.auth);
   const canView = !!user?.permissions?.events?.view || user?.role === 'admin';
   const canCreate = !!user?.permissions?.events?.create || user?.role === 'admin' || user?.role === 'manager';
+  const canDelete = !!user?.permissions?.events?.delete || user?.role === 'admin' || user?.role === 'manager';
 
   const [meetings, setMeetings] = useState([]);
   const [participants, setParticipants] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [deletingId, setDeletingId] = useState('');
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
+  const [meetingToDelete, setMeetingToDelete] = useState(null);
 
   const [form, setForm] = useState({
     title: '',
@@ -24,12 +29,11 @@ const Meetings = () => {
     notifyByEmail: false
   });
 
-  const fetchData = async () => {
+  const fetchData = useCallback(async () => {
     try {
       setLoading(true);
       if (canView) {
-        const nowIso = new Date().toISOString();
-        const list = await eventService.listMeetings({ from: nowIso });
+        const list = await eventService.listMeetings();
         setMeetings(list);
       }
       if (canCreate) {
@@ -41,9 +45,9 @@ const Meetings = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [canView, canCreate]);
 
-  useEffect(() => { fetchData(); }, []);
+  useEffect(() => { fetchData(); }, [fetchData]);
 
   const handleFormChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -71,6 +75,27 @@ const Meetings = () => {
       setError(err?.response?.data?.message || err.message);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleDeleteMeeting = (meeting) => {
+    if (!canDelete) return;
+    setMeetingToDelete(meeting);
+    setShowConfirmModal(true);
+  };
+
+  const confirmDeleteMeeting = async () => {
+    if (!meetingToDelete) return;
+    try {
+      setDeletingId(meetingToDelete._id);
+      await eventService.deleteMeeting(meetingToDelete._id);
+      await fetchData();
+    } catch (err) {
+      setError(err?.response?.data?.message || err.message);
+    } finally {
+      setDeletingId('');
+      setShowConfirmModal(false);
+      setMeetingToDelete(null);
     }
   };
 
@@ -164,6 +189,7 @@ const Meetings = () => {
                     <th>Location</th>
                     <th>Attendees</th>
                     <th>Status</th>
+                    <th>Actions</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -175,15 +201,34 @@ const Meetings = () => {
                       <td>{m.location || '-'}</td>
                       <td>{Array.isArray(m.attendees) ? m.attendees.length : 0}</td>
                       <td>{m.status}</td>
+                      <td className="text-nowrap" style={{ width: '120px' }}>
+                        {canDelete && (
+                          <Button 
+                            variant="outline-danger" 
+                            size="sm"
+                            onClick={() => handleDeleteMeeting(m)}
+                            disabled={deletingId === m._id}
+                          >
+                            <i className="bi bi-trash"></i>
+                          </Button>
+                        )}
+                      </td>
                     </tr>
                   ))}
                   {meetings.length === 0 && (
                     <tr>
-                      <td colSpan={6} className="text-center text-muted">No meetings found.</td>
+                      <td colSpan={7} className="text-center text-muted">No meetings found.</td>
                     </tr>
                   )}
                 </tbody>
               </Table>
+              <ConfirmModal
+                show={showConfirmModal}
+                onHide={() => setShowConfirmModal(false)}
+                onConfirm={confirmDeleteMeeting}
+                title="Delete Meeting"
+                message={`Are you sure you want to delete "${meetingToDelete?.title}"? This will also remove its notifications.`}
+              />
             </Card.Body>
           </Card>
         </Col>

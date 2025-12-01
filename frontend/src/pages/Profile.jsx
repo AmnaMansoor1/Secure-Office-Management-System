@@ -1,10 +1,11 @@
-import { useState, useEffect } from 'react';
-import { Container, Row, Col, Card, Form, Button, Alert, Spinner, Badge } from 'react-bootstrap';
+import { useState, useEffect, useCallback } from 'react';
+import { Container, Row, Col, Card, Form, Button, Alert, Spinner, Badge, Table } from 'react-bootstrap';
 import { useSelector, useDispatch } from 'react-redux';
 import authService from '../services/authService';
 import { login } from '../redux/slices/authSlice';
 import MFAManagement from '../components/auth/MFAManagement';
 import MFASetup from '../components/auth/MFASetup';
+import eventService from '../services/eventService';
 
 const Profile = () => {
   const { user } = useSelector((state) => state.auth);
@@ -23,6 +24,35 @@ const Profile = () => {
   const [passwordShown, setPasswordShown] = useState(false);
   const [showMFASetup, setShowMFASetup] = useState(false);
   const [userData, setUserData] = useState(null);
+  const [meetings, setMeetings] = useState([]);
+  const [meetingsLoading, setMeetingsLoading] = useState(false);
+  const [meetingsError, setMeetingsError] = useState('');
+  
+  const fetchUserData = async () => {
+    try {
+      const userProfile = await authService.getProfile();
+      setUserData(userProfile);
+    } catch (error) {
+      console.error('Error fetching user data:', error);
+    }
+  };
+  const fetchMeetings = useCallback(async () => {
+    try {
+      setMeetingsError('');
+      setMeetingsLoading(true);
+      const canViewMeetings = user?.role === 'admin' || user?.permissions?.events?.view;
+      if (!canViewMeetings) {
+        setMeetings([]);
+      } else {
+        const list = await eventService.listMeetings();
+        setMeetings(list);
+      }
+    } catch (e) {
+      setMeetingsError(e?.response?.data?.message || e.message);
+    } finally {
+      setMeetingsLoading(false);
+    }
+  }, [user]);
   
   useEffect(() => {
     if (user) {
@@ -36,17 +66,11 @@ const Profile = () => {
       
       // Fetch complete user data including MFA status
       fetchUserData();
+      fetchMeetings();
     }
-  }, [user]);
+  }, [user, fetchMeetings]);
   
-  const fetchUserData = async () => {
-    try {
-      const userProfile = await authService.getProfile();
-      setUserData(userProfile);
-    } catch (error) {
-      console.error('Error fetching user data:', error);
-    }
-  };
+  
 
   const handleDisableMFA = async () => {
     if (window.confirm('Are you sure you want to disable MFA? This will make your account less secure.')) {
@@ -107,10 +131,12 @@ const Profile = () => {
       }
       
       // Update profile
-      const updatedUser = await authService.updateProfile(updateData, user.token);
+      const updatedUser = await authService.updateProfile(updateData);
       
-      // Update Redux state
-      dispatch(login(updatedUser));
+      // Preserve token and other session fields when updating Redux/localStorage
+      const mergedUser = { ...user, ...updatedUser, token: user?.token };
+      dispatch(login(mergedUser));
+      try { localStorage.setItem('user', JSON.stringify(mergedUser)); } catch (e) { void e; }
       
       setMessage({ type: 'success', text: 'Profile updated successfully' });
       
@@ -236,6 +262,60 @@ const Profile = () => {
                   </Button>
                 </div>
               </Form>
+            </Card.Body>
+          </Card>
+        </Col>
+      </Row>
+      <Row className="justify-content-center mt-4">
+        <Col md={10}>
+          <Card>
+            <Card.Header className="bg-secondary text-white">
+              <h5 className="mb-0">My Meetings</h5>
+            </Card.Header>
+            <Card.Body>
+              {meetingsError && (
+                <Alert variant="danger" dismissible onClose={() => setMeetingsError('')}>{meetingsError}</Alert>
+              )}
+              {meetingsLoading ? (
+                <div className="text-center my-4">
+                  <Spinner animation="border" role="status">
+                    <span className="visually-hidden">Loading...</span>
+                  </Spinner>
+                </div>
+              ) : (
+                <div className="table-responsive">
+                  <Table hover>
+                    <thead>
+                      <tr>
+                        <th>Title</th>
+                        <th>Organizer</th>
+                        <th>When</th>
+                        <th>Location</th>
+                        <th>Attendees</th>
+                        <th>Status</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {meetings && meetings.length > 0 ? (
+                        meetings.map((m) => (
+                          <tr key={m._id}>
+                            <td>{m.title}</td>
+                            <td>{m.organizer?.name || 'N/A'}</td>
+                            <td>{new Date(m.startTime).toLocaleString()} — {new Date(m.endTime).toLocaleString()}</td>
+                            <td>{m.location || '-'}</td>
+                            <td>{Array.isArray(m.attendees) ? m.attendees.length : 0}</td>
+                            <td>{m.status}</td>
+                          </tr>
+                        ))
+                      ) : (
+                        <tr>
+                          <td colSpan={6} className="text-center">No meetings found</td>
+                        </tr>
+                      )}
+                    </tbody>
+                  </Table>
+                </div>
+              )}
             </Card.Body>
           </Card>
         </Col>

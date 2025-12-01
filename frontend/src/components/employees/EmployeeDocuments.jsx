@@ -1,8 +1,7 @@
 // src/components/employees/EmployeeDocuments.jsx
 import { useState, useEffect } from 'react';
 import { Card, Button, Table, Badge, Modal, Form, Alert, Spinner } from 'react-bootstrap';
-import { useDispatch } from 'react-redux';
-import { uploadDocument, deleteDocument } from '../../redux/slices/employeeSlice';
+// import { useDispatch } from 'react-redux';
 
 const EmployeeDocuments = ({ employee, onClose }) => {
   const [documents, setDocuments] = useState(employee?.documents || []);
@@ -15,7 +14,7 @@ const EmployeeDocuments = ({ employee, onClose }) => {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
 
-  const dispatch = useDispatch();
+  // const dispatch = useDispatch();
 
   useEffect(() => {
     setDocuments(employee?.documents || []);

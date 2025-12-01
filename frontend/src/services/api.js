@@ -7,7 +7,8 @@ const api = axios.create({
   baseURL,
   headers: {
     'Content-Type': 'application/json'
-  }
+  },
+  timeout: 15000
 });
 
 // Add request interceptor for adding token to requests
@@ -28,10 +29,17 @@ api.interceptors.request.use(
 api.interceptors.response.use(
   (response) => response,
   (error) => {
-    if (error.response && error.response.status === 401) {
-      // Token expired or invalid
-      localStorage.removeItem('user');
-      window.location.href = '/login';
+    const status = error?.response?.status;
+    if (status === 401) {
+      try { localStorage.removeItem('user'); } catch (e) { void e; }
+      // Soft redirect to login to avoid SPA freezing
+      if (window.location.pathname !== '/login') {
+        window.history.pushState({}, '', '/login');
+        window.dispatchEvent(new PopStateEvent('popstate'));
+      }
+    }
+    if (error.code === 'ECONNABORTED') {
+      error.message = 'Request timed out. Please try again.';
     }
     return Promise.reject(error);
   }

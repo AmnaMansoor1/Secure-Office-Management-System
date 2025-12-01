@@ -3,7 +3,6 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { logout } from '../../redux/slices/authSlice';
 import NotificationBell from '../common/NotificationBell';
-import logo from '../../assets/logo.png';
 import './Header.css';
 
 const Header = () => {

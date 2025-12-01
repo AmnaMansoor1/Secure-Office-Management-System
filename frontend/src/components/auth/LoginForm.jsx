@@ -14,7 +14,6 @@ const LoginForm = () => {
   });
   
   const [mfaRequired, setMfaRequired] = useState(false);
-  const [userId, setUserId] = useState(null);
   
   const { email, password, mfaToken } = formData;
   const navigate = useNavigate();
@@ -52,12 +51,16 @@ const LoginForm = () => {
       // Check if MFA is required
       if (response.mfaRequired) {
         setMfaRequired(true);
-        setUserId(response.userId);
         dispatch(setLoading(false));
         return;
       }
       
       dispatch(login(response));
+      try {
+        localStorage.setItem('user', JSON.stringify(response));
+      } catch {
+        // ignore storage errors
+      }
       navigate('/dashboard');
     } catch (error) {
       const message = 

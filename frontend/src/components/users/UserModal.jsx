@@ -13,33 +13,17 @@ const UserModal = ({ show, onHide, user, isEdit, onUserCreated, onUserUpdated })
     role: 'employee',
     isActive: true,
     permissions: {
-      employees: {
-        view: false,
-        create: false,
-        update: false,
-        delete: false
-      },
-      assets: {
-        view: false,
-        create: false,
-        update: false,
-        delete: false
-      },
-      expenses: {
-        view: false,
-        create: false,
-        update: false,
-        delete: false
-      },
-      income: {
-        view: false,
-        create: false,
-        update: false,
-        delete: false
-      },
-      analytics: {
-        view: false
-      }
+      employees: { view: false, create: false, update: false, delete: false },
+      assets: { view: false, create: false, update: false, delete: false },
+      expenses: { view: false, create: false, update: false, delete: false },
+      income: { view: false, create: false, update: false, delete: false },
+      analytics: { view: false },
+      tasks: { view: false, create: false, update: false, delete: false, manage: false },
+      files: { view: false, upload: false, download: false, delete: false },
+      attendance: { view: false, create: false, update: false, delete: false, manage: false },
+      leave: { view: false, create: false, update: false, delete: false, manage: false },
+      performance: { view: false, create: false, update: false, delete: false },
+      events: { view: false, create: false, update: false, delete: false, manage: false }
     }
   };
   
@@ -84,6 +68,46 @@ const UserModal = ({ show, onHide, user, isEdit, onUserCreated, onUserUpdated })
           },
           analytics: {
             view: user.permissions?.analytics?.view || false
+          },
+          tasks: {
+            view: user.permissions?.tasks?.view || false,
+            create: user.permissions?.tasks?.create || false,
+            update: user.permissions?.tasks?.update || false,
+            delete: user.permissions?.tasks?.delete || false,
+            manage: user.permissions?.tasks?.manage || false
+          },
+          files: {
+            view: user.permissions?.files?.view || false,
+            upload: user.permissions?.files?.upload || false,
+            download: user.permissions?.files?.download || false,
+            delete: user.permissions?.files?.delete || false
+          },
+          attendance: {
+            view: user.permissions?.attendance?.view || false,
+            create: user.permissions?.attendance?.create || false,
+            update: user.permissions?.attendance?.update || false,
+            delete: user.permissions?.attendance?.delete || false,
+            manage: user.permissions?.attendance?.manage || false
+          },
+          leave: {
+            view: user.permissions?.leave?.view || false,
+            create: user.permissions?.leave?.create || false,
+            update: user.permissions?.leave?.update || false,
+            delete: user.permissions?.leave?.delete || false,
+            manage: user.permissions?.leave?.manage || false
+          },
+          performance: {
+            view: user.permissions?.performance?.view || false,
+            create: user.permissions?.performance?.create || false,
+            update: user.permissions?.performance?.update || false,
+            delete: user.permissions?.performance?.delete || false
+          },
+          events: {
+            view: user.permissions?.events?.view || false,
+            create: user.permissions?.events?.create || false,
+            update: user.permissions?.events?.update || false,
+            delete: user.permissions?.events?.delete || false,
+            manage: user.permissions?.events?.manage || false
           }
         }
       });
@@ -135,31 +159,46 @@ const UserModal = ({ show, onHide, user, isEdit, onUserCreated, onUserUpdated })
     let newPermissions = { ...formData.permissions };
     
     if (role === 'admin') {
-      // Admin has all permissions
       newPermissions = {
         employees: { view: true, create: true, update: true, delete: true },
         assets: { view: true, create: true, update: true, delete: true },
         expenses: { view: true, create: true, update: true, delete: true },
         income: { view: true, create: true, update: true, delete: true },
-        analytics: { view: true }
+        analytics: { view: true },
+        tasks: { view: true, create: true, update: true, delete: true, manage: true },
+        files: { view: true, upload: true, download: true, delete: true },
+        attendance: { view: true, create: true, update: true, delete: true, manage: true },
+        leave: { view: true, create: true, update: true, delete: true, manage: true },
+        performance: { view: true, create: true, update: true, delete: true },
+        events: { view: true, create: true, update: true, delete: true, manage: true }
       };
     } else if (role === 'manager') {
-      // Manager has view permissions for everything, create/update for most things
       newPermissions = {
         employees: { view: true, create: true, update: true, delete: false },
         assets: { view: true, create: true, update: true, delete: false },
         expenses: { view: true, create: true, update: true, delete: false },
         income: { view: true, create: true, update: true, delete: false },
-        analytics: { view: true }
+        analytics: { view: true },
+        tasks: { view: true, create: true, update: true, delete: false, manage: true },
+        files: { view: true, upload: true, download: true, delete: false },
+        attendance: { view: true, create: true, update: true, delete: false, manage: true },
+        leave: { view: true, create: true, update: true, delete: false, manage: true },
+        performance: { view: true, create: true, update: true, delete: false },
+        events: { view: true, create: true, update: true, delete: false, manage: true }
       };
     } else {
-      // Regular employee has limited permissions
       newPermissions = {
         employees: { view: true, create: false, update: false, delete: false },
-        assets: { view: true, create: false, update: false, delete: false },
+        assets: { view: true, create: true, update: false, delete: false },
         expenses: { view: true, create: true, update: false, delete: false },
-        income: { view: true, create: false, update: false, delete: false },
-        analytics: { view: false }
+        income: { view: true, create: true, update: false, delete: false },
+        analytics: { view: false },
+        tasks: { view: true, create: false, update: true, delete: false, manage: false },
+        files: { view: true, upload: true, download: true, delete: true },
+        attendance: { view: true, create: true, update: false, delete: false, manage: false },
+        leave: { view: true, create: true, update: false, delete: false, manage: false },
+        performance: { view: true, create: false, update: false, delete: false },
+        events: { view: true, create: false, update: false, delete: false, manage: false }
       };
     }
     
@@ -486,6 +525,70 @@ const UserModal = ({ show, onHide, user, isEdit, onUserCreated, onUserUpdated })
                 checked={formData.permissions.analytics.view}
                 onChange={handleChange}
               />
+            </div>
+          </div>
+
+          <div className="mb-3">
+            <h6>Tasks</h6>
+            <div className="d-flex gap-4">
+              <Form.Check type="checkbox" label="View" name="tasks.view" checked={formData.permissions.tasks.view} onChange={handleChange} />
+              <Form.Check type="checkbox" label="Create" name="tasks.create" checked={formData.permissions.tasks.create} onChange={handleChange} />
+              <Form.Check type="checkbox" label="Update" name="tasks.update" checked={formData.permissions.tasks.update} onChange={handleChange} />
+              <Form.Check type="checkbox" label="Delete" name="tasks.delete" checked={formData.permissions.tasks.delete} onChange={handleChange} />
+              <Form.Check type="checkbox" label="Manage" name="tasks.manage" checked={formData.permissions.tasks.manage} onChange={handleChange} />
+            </div>
+          </div>
+
+          <div className="mb-3">
+            <h6>Files</h6>
+            <div className="d-flex gap-4">
+              <Form.Check type="checkbox" label="View" name="files.view" checked={formData.permissions.files.view} onChange={handleChange} />
+              <Form.Check type="checkbox" label="Upload" name="files.upload" checked={formData.permissions.files.upload} onChange={handleChange} />
+              <Form.Check type="checkbox" label="Download" name="files.download" checked={formData.permissions.files.download} onChange={handleChange} />
+              <Form.Check type="checkbox" label="Delete" name="files.delete" checked={formData.permissions.files.delete} onChange={handleChange} />
+            </div>
+          </div>
+
+          <div className="mb-3">
+            <h6>Attendance</h6>
+            <div className="d-flex gap-4">
+              <Form.Check type="checkbox" label="View" name="attendance.view" checked={formData.permissions.attendance.view} onChange={handleChange} />
+              <Form.Check type="checkbox" label="Create" name="attendance.create" checked={formData.permissions.attendance.create} onChange={handleChange} />
+              <Form.Check type="checkbox" label="Update" name="attendance.update" checked={formData.permissions.attendance.update} onChange={handleChange} />
+              <Form.Check type="checkbox" label="Delete" name="attendance.delete" checked={formData.permissions.attendance.delete} onChange={handleChange} />
+              <Form.Check type="checkbox" label="Manage" name="attendance.manage" checked={formData.permissions.attendance.manage} onChange={handleChange} />
+            </div>
+          </div>
+
+          <div className="mb-3">
+            <h6>Leave</h6>
+            <div className="d-flex gap-4">
+              <Form.Check type="checkbox" label="View" name="leave.view" checked={formData.permissions.leave.view} onChange={handleChange} />
+              <Form.Check type="checkbox" label="Create" name="leave.create" checked={formData.permissions.leave.create} onChange={handleChange} />
+              <Form.Check type="checkbox" label="Update" name="leave.update" checked={formData.permissions.leave.update} onChange={handleChange} />
+              <Form.Check type="checkbox" label="Delete" name="leave.delete" checked={formData.permissions.leave.delete} onChange={handleChange} />
+              <Form.Check type="checkbox" label="Manage" name="leave.manage" checked={formData.permissions.leave.manage} onChange={handleChange} />
+            </div>
+          </div>
+
+          <div className="mb-3">
+            <h6>Performance</h6>
+            <div className="d-flex gap-4">
+              <Form.Check type="checkbox" label="View" name="performance.view" checked={formData.permissions.performance.view} onChange={handleChange} />
+              <Form.Check type="checkbox" label="Create" name="performance.create" checked={formData.permissions.performance.create} onChange={handleChange} />
+              <Form.Check type="checkbox" label="Update" name="performance.update" checked={formData.permissions.performance.update} onChange={handleChange} />
+              <Form.Check type="checkbox" label="Delete" name="performance.delete" checked={formData.permissions.performance.delete} onChange={handleChange} />
+            </div>
+          </div>
+
+          <div className="mb-3">
+            <h6>Events/Meetings</h6>
+            <div className="d-flex gap-4">
+              <Form.Check type="checkbox" label="View" name="events.view" checked={formData.permissions.events.view} onChange={handleChange} />
+              <Form.Check type="checkbox" label="Create" name="events.create" checked={formData.permissions.events.create} onChange={handleChange} />
+              <Form.Check type="checkbox" label="Update" name="events.update" checked={formData.permissions.events.update} onChange={handleChange} />
+              <Form.Check type="checkbox" label="Delete" name="events.delete" checked={formData.permissions.events.delete} onChange={handleChange} />
+              <Form.Check type="checkbox" label="Manage" name="events.manage" checked={formData.permissions.events.manage} onChange={handleChange} />
             </div>
           </div>
         </Modal.Body>

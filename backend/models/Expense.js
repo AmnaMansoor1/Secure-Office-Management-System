@@ -38,7 +38,8 @@ const expenseSchema = new mongoose.Schema({
   },
   approvedBy: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'Employee'
+    ref: 'Employee',
+    set: (v) => (v === '' ? undefined : v)
   },
   recurring: {
     type: Boolean,

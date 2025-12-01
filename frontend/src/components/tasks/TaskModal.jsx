@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Modal, Button, Form, Row, Col, Spinner } from 'react-bootstrap';
+import { Modal, Button, Form, Row, Col, Spinner, Alert } from 'react-bootstrap';
 import { useDispatch, useSelector } from 'react-redux';
 import { createTask, updateTask, reset } from '../../redux/slices/taskSlice';
 
@@ -17,7 +17,7 @@ const TaskModal = ({ show, onHide, task, isEdit, employees }) => {
   const [validated, setValidated] = useState(false);
 
   const dispatch = useDispatch();
-  const { isLoading, isSuccess } = useSelector((state) => state.tasks);
+  const { isLoading, isSuccess, isError } = useSelector((state) => state.tasks);
 
   const statuses = ['pending', 'in-progress', 'completed', 'cancelled'];
   const priorities = ['low', 'medium', 'high', 'urgent'];
@@ -31,7 +31,7 @@ const TaskModal = ({ show, onHide, task, isEdit, employees }) => {
       setFormData({
         title: task.title || '',
         description: task.description || '',
-        assignedTo: task.assignedTo || '',
+        assignedTo: (task.assignedTo && typeof task.assignedTo === 'object') ? (task.assignedTo._id || '') : (task.assignedTo || ''),
         dueDate: formattedDate,
         status: task.status || 'pending',
         priority: task.priority || 'medium'
@@ -84,6 +84,12 @@ const TaskModal = ({ show, onHide, task, isEdit, employees }) => {
 
       <Form noValidate validated={validated} onSubmit={handleSubmit}>
         <Modal.Body>
+          {isEdit === false && isLoading && (
+            <Alert variant="info">Saving task...</Alert>
+          )}
+          {isEdit === false && !isLoading && isError && (
+            <Alert variant="danger">Failed to save task. Please check required fields.</Alert>
+          )}
           <Row>
             <Col md={6}>
               <Form.Group className="mb-3">
@@ -180,7 +186,11 @@ const TaskModal = ({ show, onHide, task, isEdit, employees }) => {
                   name="description"
                   value={formData.description}
                   onChange={handleChange}
+                  required
                 />
+                <Form.Control.Feedback type="invalid">
+                  Please provide a description.
+                </Form.Control.Feedback>
               </Form.Group>
             </Col>
           </Row>

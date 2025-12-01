@@ -14,10 +14,10 @@ const Files = () => {
   const [uploading, setUploading] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState({ show: false, id: null });
 
-  const canView = !!user?.permissions?.files?.view;
-  const canUpload = !!user?.permissions?.files?.upload;
-  const canDownload = !!user?.permissions?.files?.download;
-  const canDelete = !!user?.permissions?.files?.delete;
+  const canView = !!user?.permissions?.files?.view || user?.role === 'admin';
+  const canUpload = !!user?.permissions?.files?.upload || user?.role === 'admin';
+  const canDownload = !!user?.permissions?.files?.download || user?.role === 'admin';
+  const canDelete = !!user?.permissions?.files?.delete || user?.role === 'admin';
 
   const loadFiles = async () => {
     try {
@@ -136,12 +136,12 @@ const Files = () => {
                       <td>{f.originalName}</td>
                       <td>{f.mimetype}</td>
                       <td>{(f.size / 1024).toFixed(1)} KB</td>
-                      <td>{f.uploader?.name || '—'}</td>
+                      <td>{f.uploadedBy?.name || '—'}</td>
                       <td>{new Date(f.createdAt).toLocaleString()}</td>
                       <td>
-                        {f.scanStatus === 'infected' ? (
+                        {f.scan?.status === 'infected' ? (
                           <span className="badge bg-danger">Infected</span>
-                        ) : f.scanStatus === 'clean' ? (
+                        ) : f.scan?.status === 'clean' ? (
                           <span className="badge bg-success">Clean</span>
                         ) : (
                           <span className="badge bg-secondary">Unknown</span>

@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState, useCallback } from 'react';
 import { useSelector } from 'react-redux';
 import { Container, Row, Col, Card, Form, Button, Table, Alert, Badge } from 'react-bootstrap';
 import performanceService from '../services/performanceService';
@@ -18,7 +18,7 @@ ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend)
 
 const Performance = () => {
   const { user } = useSelector((state) => state.auth);
-  const canView = !!user?.permissions?.performance?.view || user?.role === 'admin' || user?.role === 'manager';
+  const canView = user?.role === 'admin' || user?.role === 'manager' || user?.role === 'employee' || !!user?.permissions?.performance?.view;
   const canCreate = !!user?.permissions?.performance?.create || user?.role === 'admin' || user?.role === 'manager';
 
   const [evaluations, setEvaluations] = useState([]);
@@ -29,27 +29,66 @@ const Performance = () => {
 
   const [filters, setFilters] = useState({ evaluationId: '', employeeId: '' });
   const [form, setForm] = useState({ evaluationId: '', employeeId: '', ratingType: 'stars', ratingValue: 3, notes: '' });
+  const [newEval, setNewEval] = useState({ periodStart: '', periodEnd: '' });
 
-  const loadInitial = async () => {
+  const loadInitial = useCallback(async () => {
     try {
       setLoading(true);
-      if (canView) {
-        const evals = await performanceService.listEvaluations();
-        setEvaluations(evals);
-        const emps = await employeeService.getEmployees({ isActive: true });
-        setEmployees(emps);
-        const list = await performanceService.listRatings({});
-        setRatings(list);
+      let evals = [];
+      // Fetch evaluations only for roles with access
+      if (user?.role === 'admin' || user?.role === 'manager' || !!user?.permissions?.performance?.view) {
+        try {
+          evals = await performanceService.listEvaluations();
+          setEvaluations(evals);
+          if (evals.length && !form.evaluationId) {
+            setForm(prev => ({ ...prev, evaluationId: evals[0]._id }));
+          }
+        } catch (e) { setError(e?.response?.data?.message || e.message); }
       }
+      // Fetch employees only if can create ratings
+      if (canCreate) {
+        try {
+          const emps = await employeeService.getEmployees({ isActive: true });
+          setEmployees(emps);
+          if (emps.length && !form.employeeId) {
+            setForm(prev => ({ ...prev, employeeId: emps[0]._id }));
+          }
+        } catch (e) { setError(e?.response?.data?.message || e.message); }
+      }
+      // Fetch ratings; employees see their own by default
+      const employeeId = user?.employee?._id || user?.employee;
+      const list = await performanceService.listRatings({
+        employeeId: user?.role === 'employee' && employeeId ? employeeId : undefined
+      });
+      setRatings(list);
     } catch (e) {
       setError(e?.response?.data?.message || e.message);
     } finally {
       setLoading(false);
     }
+  }, [user, canCreate, form.employeeId, form.evaluationId]);
+
+  useEffect(() => { loadInitial(); }, [loadInitial]);
+
+  const handleCreateEvaluation = async (e) => {
+    e.preventDefault();
+    setError('');
+    if (!newEval.periodStart || !newEval.periodEnd) {
+      setError('Please select period start and end');
+      return;
+    }
+    try {
+      setLoading(true);
+      const record = await performanceService.evaluatePeriod({ periodStart: newEval.periodStart, periodEnd: newEval.periodEnd });
+      setEvaluations(prev => [record, ...prev]);
+      setForm(prev => ({ ...prev, evaluationId: record._id }));
+      setFilters(prev => ({ ...prev, evaluationId: record._id }));
+    } catch (err) {
+      setError(err?.response?.data?.message || err.message);
+    } finally {
+      setLoading(false);
+    }
   };
-
-  useEffect(() => { loadInitial(); }, []);
-
   const handleFilterChange = async (e) => {
     const { name, value } = e.target;
     const newFilters = { ...filters, [name]: value };
@@ -173,6 +212,28 @@ const Performance = () => {
         </Col>
         {canCreate && (
           <Col md={6} lg={8}>
+            <Card className="mb-3">
+              <Card.Body>
+                <h5 className="mb-3">Create Evaluation Period</h5>
+                <Form onSubmit={handleCreateEvaluation}>
+                  <Row>
+                    <Col md={6}>
+                      <Form.Group className="mb-2">
+                        <Form.Label>Start</Form.Label>
+                        <Form.Control type="date" value={newEval.periodStart} onChange={(e) => setNewEval(prev => ({ ...prev, periodStart: e.target.value }))} />
+                      </Form.Group>
+                    </Col>
+                    <Col md={6}>
+                      <Form.Group className="mb-2">
+                        <Form.Label>End</Form.Label>
+                        <Form.Control type="date" value={newEval.periodEnd} onChange={(e) => setNewEval(prev => ({ ...prev, periodEnd: e.target.value }))} />
+                      </Form.Group>
+                    </Col>
+                  </Row>
+                  <Button type="submit" disabled={loading}>{loading ? 'Creating...' : 'Create Evaluation'}</Button>
+                </Form>
+              </Card.Body>
+            </Card>
             <Card>
               <Card.Body>
                 <h5 className="mb-3">Add Rating</h5>

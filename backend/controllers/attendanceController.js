@@ -44,6 +44,15 @@ exports.markAttendance = async (req, res) => {
     const attendanceDate = date ? new Date(date) : new Date();
     attendanceDate.setHours(0, 0, 0, 0);
 
+    // Helpers to handle time-only inputs (e.g., "09:30") by combining with attendance date
+    const isTimeOnly = (t) => typeof t === 'string' && /^\d{1,2}:\d{2}$/.test(t);
+    const combineTime = (timeStr, baseDate) => {
+      const [h, m] = timeStr.split(':').map(Number);
+      const d = new Date(baseDate);
+      d.setHours(h, m, 0, 0);
+      return d;
+    };
+
     // Upsert to avoid duplicates
     const update = {
       status: status || 'present',
@@ -51,8 +60,8 @@ exports.markAttendance = async (req, res) => {
       createdBy: req.user._id,
       updatedBy: req.user._id
     };
-    if (checkIn) update.checkIn = new Date(checkIn);
-    if (checkOut) update.checkOut = new Date(checkOut);
+    if (checkIn) update.checkIn = isTimeOnly(checkIn) ? combineTime(checkIn, attendanceDate) : new Date(checkIn);
+    if (checkOut) update.checkOut = isTimeOnly(checkOut) ? combineTime(checkOut, attendanceDate) : new Date(checkOut);
 
     const record = await Attendance.findOneAndUpdate(
       { user: targetUserId, date: attendanceDate },

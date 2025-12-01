@@ -22,6 +22,7 @@ const ExpenseModal = ({ show, onHide, expense, isEdit, employees }) => {
   
   const dispatch = useDispatch();
   const { isLoading, isSuccess } = useSelector((state) => state.expenses);
+  const { user } = useSelector((state) => state.auth);
   
   // Categories and payment methods from the backend model
   const categories = [
@@ -52,7 +53,11 @@ const ExpenseModal = ({ show, onHide, expense, isEdit, employees }) => {
         recurringPeriod: expense.recurringPeriod || 'None'
       });
     } else {
-      setFormData(initialFormState);
+      const myEmployeeId = (user?.employee && typeof user.employee === 'object') ? user.employee._id : user?.employee;
+      setFormData({
+        ...initialFormState,
+        approvedBy: user?.role === 'employee' ? (myEmployeeId || '') : ''
+      });
     }
     
     setValidated(false);
@@ -198,6 +203,7 @@ const ExpenseModal = ({ show, onHide, expense, isEdit, employees }) => {
                   name="approvedBy"
                   value={formData.approvedBy}
                   onChange={handleChange}
+                  disabled={user?.role === 'employee'}
                 >
                   <option value="">Not specified</option>
                   {employees && employees.map((employee) => (

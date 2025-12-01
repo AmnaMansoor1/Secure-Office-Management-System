@@ -7,21 +7,52 @@ import { Table, Button, Form, Row, Col, Spinner, Badge, Modal } from 'react-boot
 const Attendance = () => {
   const dispatch = useDispatch();
   const { records, loading, error } = useSelector(state => state.attendance);
+  // Get current user for permission checks
+  const { user } = useSelector(state => state.auth);
   const [filters, setFilters] = useState({ status: '', date: '' });
   const [showMark, setShowMark] = useState(false);
   const [markData, setMarkData] = useState({ date: '', status: 'present', checkIn: '', checkOut: '', notes: '' });
 
+  // Permission gating
+  const canView = !!user?.permissions?.attendance?.view || user?.role === 'admin';
+  const canCreate = !!user?.permissions?.attendance?.create || user?.role === 'admin';
+  const canManage = !!user?.permissions?.attendance?.manage || user?.role === 'admin';
+  const canDelete = !!user?.permissions?.attendance?.delete || user?.role === 'admin';
+
   useEffect(() => {
-    dispatch(getAttendance({ status: filters.status || undefined, date: filters.date || undefined }));
-  }, [dispatch, filters]);
+    if (!canView) return;
+    const params = {
+      status: filters.status || undefined
+    };
+    if (filters.date) {
+      // Map single date filter to start/end for backend API
+      params.startDate = filters.date;
+      params.endDate = filters.date;
+    }
+    // Employees default to their own records
+    if (user?.role === 'employee' && user?._id) {
+      params.userId = user._id;
+    }
+    dispatch(getAttendance(params));
+  }, [dispatch, filters, canView, user]);
 
   const handleMark = () => {
+    if (!canCreate) return;
     dispatch(createAttendance(markData)).then(() => { setShowMark(false); setMarkData({ date: '', status: 'present', checkIn: '', checkOut: '', notes: '' }); });
   };
 
-  const statusVariant = (s) => ({ present: 'success', absent: 'danger', remote: 'info', halfday: 'warning' }[s] || 'secondary');
+  const statusVariant = (s) => ({ present: 'success', absent: 'danger', remote: 'info', 'half-day': 'warning' }[s] || 'secondary');
 
   const shouldShowError = error && error !== 'You do not have permission to perform this action';
+
+  if (!canView) {
+    return (
+      <div className="p-3">
+        <h3>Attendance</h3>
+        <div className="text-danger">You do not have permission to view attendance.</div>
+      </div>
+    );
+  }
 
   return (
     <div className="p-3">
@@ -36,11 +67,13 @@ const Attendance = () => {
             <option value="present">Present</option>
             <option value="absent">Absent</option>
             <option value="remote">Remote</option>
-            <option value="halfday">Half Day</option>
+            <option value="half-day">Half Day</option>
           </Form.Select>
         </Col>
         <Col md="auto">
-          <Button onClick={() => setShowMark(true)}>Mark Attendance</Button>
+          {canCreate && (
+            <Button onClick={() => setShowMark(true)}>Mark Attendance</Button>
+          )}
         </Col>
       </Row>
 
@@ -49,6 +82,7 @@ const Attendance = () => {
       <Table striped bordered hover>
         <thead>
           <tr>
+            <th>User</th>
             <th>Date</th>
             <th>Status</th>
             <th>Check-In</th>
@@ -60,14 +94,19 @@ const Attendance = () => {
         <tbody>
           {records.map((r) => (
             <tr key={r._id}>
+              <td>{r.user?.name || r.employee?.name || '-'} ({r.user?.email || '-'})</td>
               <td>{new Date(r.date).toLocaleDateString()}</td>
               <td><Badge bg={statusVariant(r.status)}>{r.status}</Badge></td>
               <td>{r.checkIn || '-'}</td>
               <td>{r.checkOut || '-'}</td>
               <td>{r.notes || '-'}</td>
               <td>
-                <Button size="sm" variant="outline-primary" onClick={() => dispatch(editAttendance({ id: r._id, payload: { status: r.status === 'present' ? 'absent' : 'present' } }))}>Toggle</Button>{' '}
-                <Button size="sm" variant="outline-danger" onClick={() => dispatch(removeAttendance(r._id))}>Delete</Button>
+                {canManage && (
+                  <Button size="sm" variant="outline-primary" onClick={() => dispatch(editAttendance({ id: r._id, payload: { status: r.status === 'present' ? 'absent' : 'present' } }))}>Toggle</Button>
+                )}{' '}
+                {canDelete && (
+                  <Button size="sm" variant="outline-danger" onClick={() => dispatch(removeAttendance(r._id))}>Delete</Button>
+                )}
               </td>
             </tr>
           ))}
@@ -90,7 +129,7 @@ const Attendance = () => {
                 <option value="present">Present</option>
                 <option value="absent">Absent</option>
                 <option value="remote">Remote</option>
-                <option value="halfday">Half Day</option>
+                <option value="half-day">Half Day</option>
               </Form.Select>
             </Form.Group>
             <Row>
@@ -115,7 +154,7 @@ const Attendance = () => {
         </Modal.Body>
         <Modal.Footer>
           <Button variant="secondary" onClick={() => setShowMark(false)}>Cancel</Button>
-          <Button onClick={handleMark}>Save</Button>
+          {canCreate && <Button onClick={handleMark}>Save</Button>}
         </Modal.Footer>
       </Modal>
     </div>

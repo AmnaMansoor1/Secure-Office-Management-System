@@ -8,7 +8,7 @@ router.use(protect);
 
 router.post('/evaluate', checkPermission('performance', 'create'), evaluatePerformance);
 router.post('/rate', checkPermission('performance', 'create'), addRating);
-router.get('/ratings', checkPermission('performance', 'view'), listRatings);
+router.get('/ratings', listRatings);
 router.get('/', checkPermission('performance', 'view'), listEvaluations);
 router.get('/:id', checkPermission('performance', 'view'), getEvaluation);
 

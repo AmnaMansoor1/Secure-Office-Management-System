@@ -62,8 +62,14 @@ exports.protect = async (req, res, next) => {
           req.user.permissions.attendance.view = true;
           req.user.permissions.attendance.create = true;
         }
+        // Events/Meetings: allow employees to view their meetings
+        req.user.permissions.events = req.user.permissions.events || {};
+        const prevEventsView = req.user.permissions.events.view === true;
+        if (!prevEventsView) {
+          req.user.permissions.events.view = true;
+        }
         // Persist only if anything changed
-        if (!prevView || !prevUpload || !prevLeaveView || !prevLeaveCreate || !prevAttView || !prevAttCreate) {
+        if (!prevView || !prevUpload || !prevLeaveView || !prevLeaveCreate || !prevAttView || !prevAttCreate || !prevEventsView) {
           await req.user.save({ validateBeforeSave: false });
         }
       }

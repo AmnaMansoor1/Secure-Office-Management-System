@@ -5,9 +5,22 @@ const connectDB = require('./config/db');
 const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
 const User = require('./models/User'); // adjust path if needed
+const Employee = require('./models/Employee');
 
 mongoose.connection.once('open', async () => {
   try {
+    // Ensure employees can have duplicate emails: drop unique index if present
+    try {
+      const indexes = await Employee.collection.indexes();
+      const emailIdx = indexes.find((i) => i.name === 'email_1');
+      if (emailIdx && emailIdx.unique) {
+        await Employee.collection.dropIndex('email_1');
+        console.log('✅ Dropped unique index on Employee.email');
+      }
+    } catch (idxErr) {
+      console.warn('ℹ️ Could not inspect/drop Employee.email index:', idxErr?.message || idxErr);
+    }
+
     const adminEmail = 'admin@gmail.com';
     const existingAdmin = await User.findOne({ email: adminEmail });
 

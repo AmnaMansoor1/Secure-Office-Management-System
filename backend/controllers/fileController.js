@@ -100,7 +100,9 @@ exports.listFiles = async (req, res) => {
     } else {
       query = { uploadedBy: req.user.id };
     }
-    const files = await File.find(query).sort({ createdAt: -1 });
+    const files = await File.find(query)
+      .sort({ createdAt: -1 })
+      .populate('uploadedBy', 'name email');
     res.json(files);
   } catch (e) {
     res.status(500).json({ message: e.message });

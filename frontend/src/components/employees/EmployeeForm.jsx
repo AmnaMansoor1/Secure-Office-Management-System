@@ -33,7 +33,7 @@ const EmployeeForm = ({ onClose }) => {
   });
   
   const dispatch = useDispatch();
-  const { employee, isLoading, isSuccess } = useSelector((state) => state.employees);
+  const { employee, isLoading, isSuccess, isError, message } = useSelector((state) => state.employees);
   
   useEffect(() => {
     if (employee) {
@@ -143,6 +143,9 @@ const EmployeeForm = ({ onClose }) => {
   
   return (
     <Form onSubmit={handleSubmit}>
+      {isError && message && (
+        <div className="text-danger mb-2">{message}</div>
+      )}
       <Row>
         <Col md={6}>
           <Form.Group className="mb-3">

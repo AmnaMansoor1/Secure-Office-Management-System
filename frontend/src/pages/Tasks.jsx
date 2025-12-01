@@ -22,9 +22,9 @@ const Tasks = () => {
   const { users } = useSelector((state) => state.auth);
   const { user } = useSelector((state) => state.auth);
 
-  const canCreate = user?.permissions?.tasks?.create;
-  const canUpdate = user?.permissions?.tasks?.update;
-  const canDelete = user?.permissions?.tasks?.delete;
+  const canCreate = user?.role === 'admin' || user?.permissions?.tasks?.create;
+  const canUpdate = user?.role === 'admin' || user?.permissions?.tasks?.update;
+  const canDelete = user?.role === 'admin' || user?.permissions?.tasks?.delete;
   const canView = user?.role === 'admin' || user?.permissions?.tasks?.view;
 
   useEffect(() => {
@@ -90,7 +90,8 @@ const Tasks = () => {
   const filteredTasks = tasks.filter(task => {
     const matchesStatus = !filterStatus || task.status === filterStatus;
     const matchesPriority = !filterPriority || task.priority === filterPriority;
-    const matchesAssignee = !filterAssignee || task.assignedTo === filterAssignee;
+    const assignedId = (task.assignedTo && typeof task.assignedTo === 'object') ? task.assignedTo._id : task.assignedTo;
+    const matchesAssignee = !filterAssignee || assignedId === filterAssignee;
     return matchesStatus && matchesPriority && matchesAssignee;
   });
 

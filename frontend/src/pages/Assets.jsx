@@ -14,7 +14,7 @@ const Assets = () => {
   const [filterCategory, setFilterCategory] = useState('');
 
   const dispatch = useDispatch();
-  const { assets, isLoading, isError, isSuccess, message } = useSelector((state) => state.assets);
+  const { assets, isLoading, isError, message } = useSelector((state) => state.assets);
   const { employees } = useSelector((state) => state.employees);
   const { user } = useSelector((state) => state.auth);
 

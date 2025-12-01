@@ -1,5 +1,7 @@
 // controllers/expenseController.js
 const Expense = require('../models/Expense');
+const User = require('../models/User');
+const Employee = require('../models/Employee');
 
 // @desc    Get all expenses
 // @route   GET /api/expenses
@@ -62,12 +64,46 @@ exports.getExpenseById = async (req, res) => {
 
 // @desc    Create a new expense
 // @route   POST /api/expenses
-// @access  Public
+// @access  Private (expenses.create)
 exports.createExpense = async (req, res) => {
   try {
-    const newExpense = new Expense(req.body);
-    const savedExpense = await newExpense.save();
-    res.status(201).json(savedExpense);
+    const body = { ...req.body };
+
+    // Sanitize empty approvedBy values
+    if (typeof body.approvedBy === 'string' && body.approvedBy.trim() === '') {
+      delete body.approvedBy;
+    }
+
+    // If employee is creating the expense, force approvedBy to their employee id
+    if (req.user && req.user.role === 'employee') {
+      let employeeId = req.user.employee;
+      if (!employeeId && req.user.email) {
+        const emp = await Employee.findOne({ email: req.user.email });
+        if (emp) employeeId = emp._id;
+      }
+      if (!employeeId) {
+        const linkedUser = await User.findById(req.user._id);
+        const createdEmp = await Employee.create({
+          name: linkedUser?.name || 'Employee',
+          email: linkedUser?.email || '',
+          position: 'Employee',
+          department: 'General',
+          salary: 0,
+          isActive: true,
+          joinDate: new Date()
+        });
+        employeeId = createdEmp._id;
+        if (linkedUser) {
+          linkedUser.employee = employeeId;
+          await linkedUser.save({ validateBeforeSave: false });
+        }
+      }
+      body.approvedBy = employeeId;
+    }
+
+    const created = await Expense.create(body);
+    const populated = await Expense.findById(created._id).populate('approvedBy', 'name');
+    res.status(201).json(populated);
   } catch (error) {
     res.status(400).json({ message: error.message });
   }
@@ -75,12 +111,44 @@ exports.createExpense = async (req, res) => {
 
 // @desc    Update an expense
 // @route   PUT /api/expenses/:id
-// @access  Public
+// @access  Private (expenses.update)
 exports.updateExpense = async (req, res) => {
   try {
+    const update = { ...req.body };
+    // Sanitize empty approvedBy values
+    if (typeof update.approvedBy === 'string' && update.approvedBy.trim() === '') {
+      delete update.approvedBy;
+    }
+    // If employee is updating, keep approvedBy tied to their own employee id
+    if (req.user && req.user.role === 'employee') {
+      let employeeId = req.user.employee;
+      if (!employeeId && req.user.email) {
+        const emp = await Employee.findOne({ email: req.user.email });
+        if (emp) employeeId = emp._id;
+      }
+      if (!employeeId) {
+        const linkedUser = await User.findById(req.user._id);
+        const createdEmp = await Employee.create({
+          name: linkedUser?.name || 'Employee',
+          email: linkedUser?.email || '',
+          position: 'Employee',
+          department: 'General',
+          salary: 0,
+          isActive: true,
+          joinDate: new Date()
+        });
+        employeeId = createdEmp._id;
+        if (linkedUser) {
+          linkedUser.employee = employeeId;
+          await linkedUser.save({ validateBeforeSave: false });
+        }
+      }
+      update.approvedBy = employeeId;
+    }
+
     const updatedExpense = await Expense.findByIdAndUpdate(
       req.params.id,
-      req.body,
+      update,
       { new: true, runValidators: true }
     );
     

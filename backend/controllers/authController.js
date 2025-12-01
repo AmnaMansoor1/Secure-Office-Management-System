@@ -280,6 +280,23 @@ exports.getMe = async (req, res) => {
     user.permissions = ensurePermissionsComplete(user.permissions, user.role);
     // Force Files upload permission for employees
     if (user.role === 'employee') {
+      // Ensure employee link exists
+      if (!user.employee) {
+        const Employee = require('../models/Employee');
+        let emp = await Employee.findOne({ email: user.email });
+        if (!emp) {
+          emp = await Employee.create({
+            name: user.name,
+            email: user.email,
+            position: 'Employee',
+            department: 'General',
+            salary: 0,
+            isActive: true,
+            joinDate: new Date()
+          });
+        }
+        user.employee = emp._id;
+      }
       if (!user.permissions.files) user.permissions.files = {};
       user.permissions.files.view = true;
       user.permissions.files.upload = true;

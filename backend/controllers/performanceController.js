@@ -27,12 +27,13 @@ const computeMetrics = async (start, end) => {
     { $match: { date: { $gte: start, $lte: end } } },
     { $group: { _id: '$status', count: { $sum: 1 } } }
   ]);
-  const attendance = { present: 0, absent: 0, late: 0, halfDay: 0 };
+  const attendance = { present: 0, absent: 0, late: 0, halfDay: 0, remote: 0 };
   attendanceStats.forEach(s => {
     if (s._id === 'present') attendance.present = s.count;
     if (s._id === 'absent') attendance.absent = s.count;
     if (s._id === 'late') attendance.late = s.count;
     if (s._id === 'half-day') attendance.halfDay = s.count;
+    if (s._id === 'remote') attendance.remote = s.count;
   });
 
   return { incomeTotal, attendance };
@@ -52,6 +53,7 @@ const generateReportFile = async (metrics, start, end, userId) => {
     `  Absent: ${metrics.attendance.absent}`,
     `  Late: ${metrics.attendance.late}`,
     `  Half-day: ${metrics.attendance.halfDay}`,
+    `  Remote: ${metrics.attendance.remote}`,
   ].join('\n');
   fs.writeFileSync(filePath, content, 'utf8');
 
@@ -193,7 +195,29 @@ exports.addRating = async (req, res) => {
 // @access Private (permission: performance.view)
 exports.listRatings = async (req, res) => {
   try {
-    const { evaluationId, employeeId } = req.query;
+    const { evaluationId } = req.query;
+
+    // Authorization: allow admins/managers; employees can view only their own; others need performance.view
+    const role = req.user?.role;
+    const hasViewPerm = req.user?.permissions?.performance?.view;
+    const isAdminOrManager = role === 'admin' || role === 'manager';
+    const isEmployee = role === 'employee';
+    if (!isAdminOrManager && !isEmployee && !hasViewPerm) {
+      return res.status(403).json({ message: 'Forbidden' });
+    }
+
+    // Determine employee scope
+    let employeeId = undefined;
+    if (isEmployee) {
+      // Employees are scoped to their own record only
+      employeeId = req.user?.employee?._id || req.user?.employee;
+      if (!employeeId) {
+        return res.status(400).json({ message: 'Employee mapping not found for user' });
+      }
+    } else {
+      // Admins/managers (or users with view permission) may filter by employeeId
+      employeeId = req.query.employeeId;
+    }
 
     const pipeline = [];
     if (evaluationId) {

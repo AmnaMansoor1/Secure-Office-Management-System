@@ -10,7 +10,8 @@ const PerformanceEvaluationSchema = new mongoose.Schema({
       present: { type: Number, default: 0 },
       absent: { type: Number, default: 0 },
       late: { type: Number, default: 0 },
-      halfDay: { type: Number, default: 0 }
+      halfDay: { type: Number, default: 0 },
+      remote: { type: Number, default: 0 }
     }
   },
   evaluator: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },

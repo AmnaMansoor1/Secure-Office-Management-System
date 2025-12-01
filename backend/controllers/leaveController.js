@@ -1,6 +1,7 @@
 // controllers/leaveController.js
 const LeaveRequest = require('../models/LeaveRequest');
 const User = require('../models/User');
+const Notification = require('../models/Notification');
 
 // @desc Get leave requests
 // @route GET /api/leave
@@ -74,6 +75,16 @@ exports.decideLeave = async (req, res) => {
 
     const leave = await LeaveRequest.findByIdAndUpdate(id, update, { new: true });
     if (!leave) return res.status(404).json({ message: 'Leave request not found' });
+
+    // Notify the employee about the decision (non-blocking)
+    try {
+      const title = action === 'approve' ? 'Leave Request Approved' : 'Leave Request Rejected';
+      const message = `Your leave request (${leave.type}) from ${new Date(leave.startDate).toLocaleDateString()} to ${new Date(leave.endDate).toLocaleDateString()} has been ${action === 'approve' ? 'approved' : 'rejected'}${comments ? `: ${comments}` : '.'}`;
+      await Notification.create({ user: leave.user, title, message, type: 'general' });
+    } catch (e) {
+      // Do not block the response if notification fails
+      console.error('Failed to create leave decision notification:', e.message);
+    }
 
     res.json(leave);
   } catch (error) {

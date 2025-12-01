@@ -16,8 +16,11 @@ const Sidebar = () => {
 
   // Helper function to check permissions
   const hasPermission = (module, action) => {
-    if (!user || !user.permissions) return false;
-    return user.permissions[module]?.[action];
+    if (!user) return false;
+    // Admins can see all modules in the sidebar
+    if (user.role === 'admin') return true;
+    if (!user.permissions) return false;
+    return !!(user.permissions[module]?.[action]);
   };
   
   // Define sidebar sections
@@ -51,28 +54,28 @@ const Sidebar = () => {
           path: '/files',
           icon: 'bi bi-folder2',
           iconClass: 'files',
-          permission: null
+          permission: { module: 'files', action: 'view' }
         },
         {
           name: 'Attendance & Leave',
           path: '/attendance',
           icon: 'bi bi-calendar-event',
           iconClass: 'attendance-leave',
-          permission: null
+          permission: { module: 'attendance', action: 'view' }
         },
         {
           name: 'Performance',
           path: '/performance',
           icon: 'bi bi-award',
           iconClass: 'performance',
-          permission: null
+          permission: { module: 'performance', action: 'view' }
         },
         {
           name: 'Meetings',
           path: '/meetings',
           icon: 'bi bi-people',
           iconClass: 'meetings',
-          permission: null
+          permission: { module: 'events', action: 'view' }
         },
         // Removed separate Leave item; unified under 'Attendance & Leave'
       ]

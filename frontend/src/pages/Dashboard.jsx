@@ -14,6 +14,31 @@ const Dashboard = () => {
   // Check for analytics or dashboard permission
   const canViewDashboard = user?.permissions?.analytics?.view || user?.role === 'admin';
 
+  // Always call hooks before any conditional returns
+  
+  useEffect(() => {
+    // Avoid fetching dashboard data if user has no permission
+    if (!canViewDashboard) {
+      setLoading(false);
+      setError(null);
+      return;
+    }
+
+    const fetchDashboardData = async () => {
+      try {
+        const response = await api.get('/analytics/dashboard');
+        setDashboardData(response.data);
+        setLoading(false);
+      } catch (error) {
+        const message = error?.response?.data?.message || error.message || 'Failed to fetch dashboard data';
+        setError(message);
+        setLoading(false);
+      }
+    };
+    
+    fetchDashboardData();
+  }, [canViewDashboard]);
+  
   if (!canViewDashboard) {
     return (
       <div className="d-flex flex-column align-items-center justify-content-center" style={{ minHeight: '60vh' }}>
@@ -31,22 +56,7 @@ const Dashboard = () => {
       </div>
     );
   }
-  
-  useEffect(() => {
-    const fetchDashboardData = async () => {
-      try {
-        const response = await api.get('/analytics/dashboard');
-        setDashboardData(response.data);
-        setLoading(false);
-      } catch (error) {
-        setError('Failed to fetch dashboard data');
-        setLoading(false);
-      }
-    };
-    
-    fetchDashboardData();
-  }, []);
-  
+
   if (loading) {
     return <div className="text-center my-5"><h3>Loading dashboard data...</h3></div>;
   }
