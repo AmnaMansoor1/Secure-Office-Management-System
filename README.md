@@ -1,9 +1,6 @@
 # 🏢 Office Management System
 Roll No:
 SP23-BSE-037 (Amna Mansoor)
-SP23-BSE-019(Ayesha Tahir)
-SP23-BSE-048(Ayesha Zaffar)
-SP23-BSE-053(Eman Fatima)
 
 Major Components:
 1.	User Authentication and Authorization
